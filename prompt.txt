@@ -1,0 +1,349 @@
+Je souhaite creer un site de coiffeuse style Awwwards premium, pro,et surtout bon seo. Je suis sur Next.js.
+La logique psychologique derrière tout ça L’utilisateur vit ce parcours : WOW ↓ c'est beau ↓ ça semble professionnel ↓ les autres clientes sont satisfaites ↓ je réserve Donc : Emotion ↓ Raison ↓ Confiance ↓ Action.  Mon architecture finale C Pour ton site je ferais exactement : HERO ↓ STORY ↓ STYLES GALLERY ↓ PROCESS ↓ TESTIMONIALS ↓ BOOKING CTA ↓ FOOTER C’est très propre, premium et efficace. Ok c'est bon t'es a jour sur mon architecture.
+En details: 1️⃣ Hero 3D / vidéo immersive Objectif : capter l’attention immédiatement. Ce n’est pas seulement une image. Structure réelle : Canvas / vidéo Titre fort Sous-titre CTA Réserver Exemple concret : [Tresses africaines modernes] Beauté • Précision • Élégance [Réserver ma séance] Ce qui peut être immersif : vidéo slow motion cheveux animation légère Three.js reveal du texte au scroll ⚠️ règle agence : CTA visible immédiatement. 2️⃣ Story / identité du salon Objectif : 👉 donner une âme au salon Les clientes ne réservent pas seulement une coiffure. Elles réservent : un style une confiance une personnalité Structure classique : Image / vidéo + texte court Exemple : Chaque tresse raconte une histoire. Notre salon mélange tradition africaine et esthétique moderne. Animation possible : texte qui apparaît au scroll image qui change selon le scroll 3️⃣ Interactive gallery / styles C’est la partie la plus importante après le hero. Objectif : montrer le résultat réel Structure : grid de coiffures Exemple : Box Braids Fulani Braids Knotless Braids Cornrows Interaction possible : hover → zoom click → détails scroll → reveal Chaque carte peut ouvrir : /coiffures/fulani-braids Très bon pour SEO. 4️⃣ Process / réservation expliquée Objectif : 👉 rassurer la cliente Les gens hésitent souvent parce qu’ils ne savent pas : combien de temps comment ça se passe quoi faire Donc on explique. Structure : 1. Choisissez votre style 2. Réservez un créneau 3. Venez au salon 4. Profitez du résultat Design possible : timeline ou cards C’est une section très conversion. 5️⃣ Testimonials / preuve sociale Objectif : 👉 créer la confiance Structure classique : ⭐️⭐️⭐️⭐️⭐️ "Coiffure magnifique, très professionnelle" Ou : avant / après avis instagram feed Pourquoi c’est puissant : si d'autres clientes sont satisfaites → je peux réserver 6️⃣ Hair style builder (optionnel) C’est la partie expérience interactive. Exemple possible : choisir style choisir longueur voir aperçu Mais pour ton projet : 👉 pas nécessaire Donc bon choix de l’enlever. 7️⃣ Call to action / réservation principale C’est la conversion finale. Bloc simple : Prête pour votre nouvelle coiffure ? [Réserver maintenant] Options : option 1 formulaire option 2 WhatsApp option 3 calendrier
+J'ai deja fait le Hero. Arriere plan 3D c'est ok. 
+
+```javascriptreact
+"use client";
+
+import { Canvas, useFrame } from "@react-three/fiber";
+import { OrbitControls, Environment } from "@react-three/drei";
+import Float from "./elements/Float";
+import Letter from "./elements/Letter";
+import ParticleSystem from "./elements/ParticleSystem";
+import { easing } from "maath";
+
+// Dans ton composant Scene3D
+const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+
+export default function Scene3D() {
+  return (
+    <Canvas
+      shadows
+      camera={{ position: [0, 5, 12], fov: 45 }}
+      style={{ background: "black" }}
+    >
+      <CameraRig />
+      {/* <OrbitControls enableDamping dampingFactor={0.05} enableZoom={false} /> */}
+      <ambientLight intensity={0.4} />
+      <directionalLight position={[10, 10, 5]} intensity={1} castShadow />
+
+      <Environment preset="warehouse" />
+
+      {/* Particules subtiles */}
+      <ParticleSystem
+        position={[0, 0, -10]}
+        count={isMobile ? 2000 : 1500}
+        radius={20}
+        shape="sphere"
+        colors={["#FFD6D6", "#F5F5F5", "#f8e1a1"]}
+        animations={["float", "spin"]}
+        blending="additive"
+      />
+
+      {/* Lettres flottantes */}
+      <Float position={[2.5, 0, -8]} speed={0.8} floatIntensity={0.4}>
+        {/* <Letter char="LN TOUCH" position={[-1, 0, 0]} size={ isMobile ? 6: 20} sandbox="turtle" /> */}
+        {/* <Letter char="l n  touch" position={[-1, 0, 0]} size={ isMobile ? 6: 20} sandbox="turtle" /> */}
+        {/* <Letter char="LN touch" position={[-1, 0, 0]} size={ isMobile ? 6: 20} sandbox="turtle" /> */}
+        <Letter char="L N  TOUCH" position={ isMobile ? [-1.5, 1, 1] : [-1, 0, 0]} size={ isMobile ? 4: 14} sandbox="turtle" />
+        {/* <Letter char="LNTOUCH" position={[-1, 0, 0]} sandbox="basic" /> */}
+        {/* <Letter char="N" position={[0, 0, 0]} sandbox="turtle" />
+        <Letter char="X" position={[3, 0, 0]} sandbox="pingpong" /> */}
+        {/* <Letter char="TOUCH" position={[4, 0, 0]} sandbox="shoe" /> */}
+      </Float>
+    </Canvas>
+  );
+}
+
+// Camera rig pour suivi léger du pointer
+function CameraRig() {
+  useFrame((state, delta) => {
+    easing.damp3(
+      state.camera.position,
+      [-1 + (state.pointer.x * state.viewport.width) / 3, 1 + state.pointer.y, 5.5],
+      0.5,
+      delta
+    );
+    state.camera.lookAt(0, 0, 0);
+  });
+}
+```
+
+Et le hero lui meme:
+
+```javascriptreact
+"use client";
+
+import { useRef, useEffect } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
+import Scene3D from "../3d/Scene3D";
+
+gsap.registerPlugin(ScrollTrigger);
+
+export default function Hero() {
+  const sectionRef = useRef();
+  const subtitleRef = useRef();
+
+  const subtitles = [
+    "Précision • Élégance • Style",
+    "Confiance • Personnalité • Beauté",
+    "Tradition africaine • Modernité"
+  ];
+
+  useEffect(() => {
+    let currentIndex = -1;
+
+    const splitText = (text) => {
+      return text
+        .split("")
+        .map((char) => `<span class="char">${char}</span>`)
+        .join("");
+    };
+
+    const animateText = (text) => {
+      const el = subtitleRef.current;
+
+      // inject HTML splitté
+      el.innerHTML = splitText(text);
+
+      const chars = el.querySelectorAll(".char");
+
+      gsap.fromTo(
+        chars,
+        {
+          opacity: 0,
+          y: 40,
+          filter: "blur(8px)"
+        },
+        {
+          opacity: 1,
+          y: 0,
+          filter: "blur(0px)",
+          stagger: 0.03,
+          duration: 0.6,
+          ease: "power3.out"
+        }
+      );
+    };
+
+    const scrollPerText = 400;
+    const totalScroll = subtitles.length * scrollPerText;
+
+    const trigger = ScrollTrigger.create({
+      trigger: sectionRef.current,
+      start: "top top",
+      // end: "+=500",
+      end: `+=${totalScroll}`,
+      scrub: 1,
+      pin: true,
+
+      onUpdate: (self) => {
+        const progress = self.progress;
+
+        const index = Math.min(
+          subtitles.length - 1,
+          Math.floor(progress * subtitles.length * 0.999)
+        );
+
+        if (index !== currentIndex) {
+          currentIndex = index;
+          animateText(subtitles[index]);
+        }
+      }
+    });
+
+    animateText(subtitles[0]);
+
+    return () => trigger.kill();
+  }, []);
+
+  return (
+    <section
+      ref={sectionRef}
+      className="relative w-full h-screen overflow-hidden"
+    >
+      <div className="absolute inset-0 z-0 pointer-events-auto">
+        <Scene3D />
+      </div>
+
+      <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4 pointer-events-none">
+        
+        <h1 className="text-6xl md:text-7xl font-extrabold text-white">
+          Beauté
+        </h1>
+
+        <h2
+          ref={subtitleRef}
+          className="mt-4 text-2xl md:text-3xl text-gray-200"
+        />
+
+        <button className="mt-8 px-8 py-3 rounded-full bg-white text-black pointer-events-auto">
+          Réserver ma séance
+        </button>
+      </div>
+    </section>
+  );
+}
+```
+
+Le nom de la truc est lntouch.
+Mon sousis:
+* Le texte qui change est trop subtil. il devrait avoir un style qui le rendent plus vibible (weigth et police)
+* 2 les sites Awwards ont toujours de textes part-ci par là: Ajoute-le.
+Voici les balices customes de textes que j'ai creé. 
+
+```javascriptreact
+"use client";
+
+import { useRef, useEffect } from "react";
+import SplitText from "../Texts/SplitText";
+import BlurText from "../Texts/BlurText";
+import Shuffle from '../Texts/Shuffle';
+import ShinyText from '../Texts//ShinyText';
+import TextPressure from '../Texts/TextPressure';
+import ScrollFloat from '../Texts/ScrollFloat';
+import ScrollReveal from '../Texts/ScrollReveal';
+import ScrollVelocity from '../Texts/ScrollVelocity';
+import CircularText from '../Texts/CircularText';
+  
+
+
+const handleAnimationComplete = () => {
+  console.log('Animation completed!');
+};
+
+export default function Hero() {
+
+  return (
+    <section
+    style={{backgroundColor: "#6a6a6a"}}
+      className="relative w-full h-screen overflow-hidden"
+    >
+      
+
+        <h1 className="text-6xl md:text-7xl font-extrabold text-white tracking-wide">
+          Beauté
+        </h1>
+        <SplitText
+            text="Hello, you!"
+            className="text-2xl font-semibold text-center"
+            delay={50}
+            duration={1.25}
+            ease="power3.out"
+            splitType="chars"
+            from={{ opacity: 0, y: 40 }}
+            to={{ opacity: 1, y: 0 }}
+            threshold={0.1}
+            rootMargin="-100px"
+            textAlign="center"
+            // onLetterAnimationComplete={handleAnimationComplete}
+            showCallback
+        />
+
+
+        <BlurText
+        text="Isn't this so cool?!"
+        delay={200}
+        animateBy="words"
+        direction="top"
+        onAnimationComplete={handleAnimationComplete}
+        className="text-2xl mb-8"
+        />
+
+
+        <Shuffle
+        text="Hello World"
+        shuffleDirection="right"
+        duration={0.35}
+        animationMode="evenodd"
+        shuffleTimes={1}
+        ease="power3.out"
+        stagger={0.03}
+        threshold={0.1}
+        triggerOnce={true}
+        triggerOnHover
+        respectReducedMotion={true}
+        loop={true}
+        loopDelay={.5}
+        />
+
+        
+        <ShinyText
+        text="✨ Shiny Text Effect"
+        speed={2}
+        delay={0}
+        color="#b5b5b5"
+        shineColor="#ffffff"
+        spread={120}
+        direction="left"
+        yoyo={false}
+        pauseOnHover={false}
+        disabled={false}
+        />
+
+        <div style={{position: 'relative', height: '100px', width: '300px'}}>
+        <TextPressure
+            text="Hello!"
+            flex
+            alpha={false}
+            stroke={false}
+            width
+            weight
+            italic
+            textColor="#ffffff"
+            strokeColor="#5227FF"
+            minFontSize={10}
+        />
+        </div>
+
+
+        <ScrollFloat
+        animationDuration={1}
+        ease='back.inOut(2)'
+        scrollStart='center bottom+=50%'
+        scrollEnd='bottom bottom-=40%'
+        stagger={0.03}
+        >
+        React Bits
+        </ScrollFloat>
+
+        
+        <ScrollReveal
+        baseOpacity={0.1}
+        enableBlur
+        baseRotation={3}
+        blurStrength={4}
+        >
+        When does a man die? When he is hit by a bullet? No! When he suffers a disease?
+        No! When he ate a soup made out of a poisonous mushroom?
+        No! A man dies when he is forgotten!
+        </ScrollReveal>
+
+        
+        <ScrollVelocity
+        texts={['React Bits', 'Scroll Down']} 
+        velocity={100}
+        className="custom-scroll-text"
+        />
+
+        <CircularText
+        text="REACT*BITS*COMPONENTS*"
+        onHover="speedUp"
+        spinDuration={20}
+        className="custom-class"
+        />
+
+        <h2
+          className="mt-4 text-2xl md:text-3xl text-gray-200"
+        > Heeo
+        </h2>
+
+
+    </section>
+  );
+}
+```
+
+Ta mission: Redonne moi le Interactive gallery / styles digne de ce nom, responsive.
