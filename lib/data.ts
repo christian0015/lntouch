@@ -550,10 +550,10 @@ export interface SocialLink {
 }
 
 export const SOCIAL_LINKS: SocialLink[] = [
-  { platform: "instagram", href: "https://instagram.com/lntouch_officiel" },
-  { platform: "facebook", href: "https://facebook.com/lntouch" },
-  { platform: "tiktok", href: "https://tiktok.com/@lntouch" },
-  { platform: "pinterest", href: "https://pinterest.com/lntouch" },
+  { platform: "instagram", href: "https://www.instagram.com/lntouch12" },
+  { platform: "facebook", href: "https://www.instagram.com/lntouch12" },
+  { platform: "tiktok", href: "https://www.tiktok.com/@_leoniiie.t" },
+  { platform: "pinterest", href: "https://www.instagram.com/lntouch12" },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────

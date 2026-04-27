@@ -241,7 +241,7 @@ export default function FAQ() {
       </div>
 
       {/* ── Main Content ──────────────────────────────────────────────────── */}
-      <div style={{ position: "relative", zIndex: 5, maxWidth: "1400px", margin: "0 auto", padding: "0 2rem" }}>
+      <div style={{ position: "relative", zIndex: 5, maxWidth: "1400px", margin: "0 auto", padding: "0 1.2rem" }} id="faq">
         
         {/* Header */}
         <div ref={headerRef} style={{ textAlign: "center", marginBottom: "4rem" }}>
@@ -304,7 +304,7 @@ export default function FAQ() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(500px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))",
             gap: "1.5rem",
             marginBottom: "5rem"
           }}

@@ -474,9 +474,9 @@ export default function Footer() {
 
             <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
               <NavLink href="/" text="Accueil" />
-              <NavLink href="/galerie" text="Galerie" />
-              <NavLink href="/process" text="Réservation" />
-              <NavLink href="/faq" text="FAQ" />
+              <NavLink href="/coiffures" text="Galerie" />
+              <NavLink href="/reservation" text="Réservation" />
+              <NavLink href="/#faq" text="FAQ" />
             </div>
           </div>
 

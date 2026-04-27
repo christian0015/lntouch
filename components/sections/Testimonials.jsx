@@ -1,6 +1,7 @@
+// Testimonials.jsx
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { TESTIMONIALS } from "@/lib/data";
@@ -19,16 +20,15 @@ const GLOBAL_STYLES = `
   }
   
   .testimonial-card {
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
   
   .testimonial-card:hover {
-    transform: translateY(-12px);
+    transform: translateY(-8px);
   }
   
   .testimonial-card:hover .testimonial-glow {
-    opacity: 1;
-    transform: scale(1);
+    opacity: 0.6;
   }
   
   .rating-star {
@@ -36,7 +36,13 @@ const GLOBAL_STYLES = `
   }
   
   .testimonial-card:hover .rating-star {
-    transform: scale(1.1);
+    transform: scale(1.05);
+  }
+
+  @media (max-width: 768px) {
+    .testimonial-card:hover {
+      transform: translateY(-4px);
+    }
   }
 `;
 
@@ -56,7 +62,6 @@ export default function Testimonials() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Header animation
       gsap.fromTo(
         headerRef.current,
         { opacity: 0, y: 40 },
@@ -72,7 +77,6 @@ export default function Testimonials() {
         }
       );
 
-      // Cards staggered animation
       cardsRef.current.forEach((card, i) => {
         gsap.fromTo(
           card,
@@ -92,7 +96,6 @@ export default function Testimonials() {
         );
       });
 
-      // Instagram section animation
       gsap.fromTo(
         instaRef.current,
         { opacity: 0, scale: 0.95 },
@@ -120,13 +123,45 @@ export default function Testimonials() {
         width="16"
         height="16"
         viewBox="0 0 24 24"
-        fill={i < rating ? "#D4AF37" : "rgba(255,255,255,0.2)"}
+        fill={i < rating ? "#D4AF37" : "rgba(255,255,255,0.15)"}
         style={{ transition: "all 0.2s ease" }}
       >
         <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
       </svg>
     ));
   };
+
+  // Données des posts sociaux
+  const socialPosts = [
+    {
+      id: 1,
+      type: "instagram",
+      embedUrl: "https://www.instagram.com/p/C-EXAMPLE1/embed",
+      profileUrl: "https://www.instagram.com/reel/DXkdNKmiPrR/?utm_source=ig_web_button_native_share",
+      thumbnail: "/api/placeholder/400/400"
+    },
+    {
+      id: 2,
+      type: "instagram",
+      embedUrl: "https://www.instagram.com/p/C-EXAMPLE2/embed",
+      profileUrl: "https://www.instagram.com/reel/DXPf1-YCL_c/?utm_source=ig_web_button_share_sheet",
+      thumbnail: "/api/placeholder/400/400"
+    },
+    {
+      id: 3,
+      type: "tiktok",
+      embedUrl: "https://www.tiktok.com/embed/v2/1234567890123456789",
+      profileUrl: "https://www.tiktok.com/@_leoniiie.t/video/7629065841786490132?is_from_webapp=1&sender_device=pc&web_id=7618903023503427092",
+      thumbnail: "/api/placeholder/400/400"
+    },
+    {
+      id: 4,
+      type: "instagram",
+      embedUrl: "https://www.instagram.com/p/C-EXAMPLE3/embed",
+      profileUrl: "https://www.instagram.com/reel/DXSQTw1CP7F/?utm_source=ig_web_button_share_sheet",
+      thumbnail: "/api/placeholder/400/400"
+    }
+  ];
 
   return (
     <section
@@ -138,7 +173,6 @@ export default function Testimonials() {
         padding: "120px 0 100px"
       }}
     >
-      {/* Geometric background elements */}
       <svg
         aria-hidden="true"
         style={{
@@ -151,40 +185,35 @@ export default function Testimonials() {
         }}
         xmlns="http://www.w3.org/2000/svg"
       >
-        {/* Diagonal lines */}
         <line x1="0" y1="20%" x2="100%" y2="15%" stroke="rgba(212,175,55,0.03)" strokeWidth="1" />
         <line x1="0" y1="40%" x2="100%" y2="35%" stroke="rgba(212,175,55,0.03)" strokeWidth="1" />
         <line x1="0" y1="60%" x2="100%" y2="55%" stroke="rgba(212,175,55,0.03)" strokeWidth="1" />
         <line x1="0" y1="80%" x2="100%" y2="75%" stroke="rgba(212,175,55,0.03)" strokeWidth="1" />
-        
-        {/* Corner brackets */}
         <path d="M 40 60 L 40 40 L 60 40" stroke="rgba(212,175,55,0.12)" strokeWidth="1" fill="none" />
         <path d="M 96% 60 L 96% 40 L 94% 40" stroke="rgba(212,175,55,0.12)" strokeWidth="1" fill="none" />
         <path d="M 40 94% L 40 96% L 60 96%" stroke="rgba(212,175,55,0.12)" strokeWidth="1" fill="none" />
         <path d="M 96% 94% L 96% 96% L 94% 96%" stroke="rgba(212,175,55,0.12)" strokeWidth="1" fill="none" />
-        
-        {/* Decorative circles */}
         <circle cx="8%" cy="15%" r="4" stroke="rgba(212,175,55,0.1)" strokeWidth="1" fill="none" />
         <circle cx="92%" cy="85%" r="6" stroke="rgba(212,175,55,0.1)" strokeWidth="1" fill="none" />
         <circle cx="85%" cy="12%" r="3" stroke="rgba(212,175,55,0.08)" strokeWidth="1" fill="none" />
       </svg>
 
-      {/* Section label */}
-      <div style={{ position: "relative", zIndex: 5, textAlign: "center", marginBottom: "3rem" }}>
+      <div style={{ position: "relative", zIndex: 5, textAlign: "center", marginBottom: "3rem", padding: "0 1.5rem" }}>
         <div
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             gap: "16px",
-            marginBottom: "1.5rem"
+            marginBottom: "1.5rem",
+            flexWrap: "wrap"
           }}
         >
           <div style={{ height: "1px", width: "48px", background: "rgba(212,175,55,0.3)" }} />
           <span
             style={{
               fontFamily: "'Space Mono', monospace",
-              fontSize: "11px",
+              fontSize: "10px",
               letterSpacing: "0.28em",
               color: "#D4AF37",
               textTransform: "uppercase"
@@ -199,7 +228,7 @@ export default function Testimonials() {
           ref={headerRef}
           style={{
             fontFamily: "'Playfair Display', Georgia, serif",
-            fontSize: "clamp(2.5rem, 6vw, 4rem)",
+            fontSize: "clamp(2rem, 6vw, 3.5rem)",
             fontWeight: 700,
             color: "#ffffff",
             letterSpacing: "-0.02em",
@@ -213,7 +242,7 @@ export default function Testimonials() {
         <p
           style={{
             fontFamily: "'Cormorant Garamond', Georgia, serif",
-            fontSize: "clamp(1rem, 2vw, 1.2rem)",
+            fontSize: "clamp(0.9rem, 2vw, 1.1rem)",
             color: "rgba(255,255,255,0.6)",
             maxWidth: "600px",
             margin: "0 auto",
@@ -224,17 +253,19 @@ export default function Testimonials() {
         </p>
       </div>
 
-      {/* Testimonials grid */}
+      {/* Testimonials grid - Centered on mobile */}
       <div
         style={{
           position: "relative",
           zIndex: 5,
           maxWidth: "1400px",
           margin: "0 auto",
-          padding: "0 2rem",
+          padding: "0 1.5rem",
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(380px, 1fr))",
-          gap: "2rem"
+          gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+          gap: "2rem",
+          justifyItems: "center",
+          alignItems: "stretch"
         }}
       >
         {TESTIMONIALS.map((testimonial, index) => (
@@ -244,51 +275,71 @@ export default function Testimonials() {
             className="testimonial-card"
             style={{
               position: "relative",
-              background: "rgba(10,10,10,0.6)",
+              width: "100%",
+              maxWidth: "450px",
+              background: "linear-gradient(135deg, rgba(15,15,15,0.8) 0%, rgba(8,8,8,0.9) 100%)",
               backdropFilter: "blur(20px)",
-              border: "1px solid rgba(212,175,55,0.15)",
-              borderRadius: "24px",
-              padding: "2rem",
-              transition: "all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-              cursor: "pointer"
+              border: "1px solid rgba(212,175,55,0.12)",
+              borderRadius: "20px",
+              padding: "1.75rem",
+              transition: "all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+              cursor: "pointer",
+              boxSizing: "border-box"
             }}
           >
-            {/* Glow effect on hover */}
             <div
               className="testimonial-glow"
               style={{
                 position: "absolute",
                 inset: 0,
-                borderRadius: "24px",
-                background: "radial-gradient(circle at 50% 0%, rgba(212,175,55,0.1), transparent 70%)",
+                borderRadius: "20px",
+                background: "radial-gradient(circle at 50% 0%, rgba(212,175,55,0.08), transparent 70%)",
                 opacity: 0,
-                transition: "opacity 0.4s ease",
+                transition: "opacity 0.5s ease",
                 pointerEvents: "none"
               }}
             />
 
-            {/* Header with avatar and rating */}
+            {/* Quotation mark */}
+            <div
+              style={{
+                position: "absolute",
+                top: "20px",
+                right: "24px",
+                fontSize: "4rem",
+                fontFamily: "'Playfair Display', serif",
+                color: "rgba(212,175,55,0.08)",
+                lineHeight: 1,
+                pointerEvents: "none"
+              }}
+            >
+              "
+            </div>
+
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                marginBottom: "1.5rem"
+                marginBottom: "1.5rem",
+                flexWrap: "wrap",
+                gap: "1rem"
               }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
                 <div
                   style={{
-                    width: "48px",
-                    height: "48px",
+                    width: "52px",
+                    height: "52px",
                     borderRadius: "50%",
-                    background: "linear-gradient(135deg, #D4AF37, #B8860B)",
+                    background: "linear-gradient(135deg, #D4AF37 0%, #8B6914 100%)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    fontSize: "20px",
+                    fontSize: "22px",
                     fontWeight: "bold",
-                    color: "#000"
+                    color: "#0a0a0a",
+                    boxShadow: "0 4px 15px rgba(212,175,55,0.2)"
                   }}
                 >
                   {testimonial.name.charAt(0)}
@@ -297,10 +348,11 @@ export default function Testimonials() {
                   <h4
                     style={{
                       fontFamily: "'Space Mono', monospace",
-                      fontSize: "0.9rem",
-                      fontWeight: 700,
+                      fontSize: "0.85rem",
+                      fontWeight: 600,
                       color: "#ffffff",
-                      margin: 0
+                      margin: 0,
+                      letterSpacing: "-0.3px"
                     }}
                   >
                     {testimonial.name}
@@ -308,8 +360,8 @@ export default function Testimonials() {
                   <p
                     style={{
                       fontFamily: "'Space Mono', monospace",
-                      fontSize: "0.7rem",
-                      color: "rgba(255,255,255,0.4)",
+                      fontSize: "0.65rem",
+                      color: "rgba(212,175,55,0.6)",
                       margin: "4px 0 0",
                       letterSpacing: "0.05em"
                     }}
@@ -318,42 +370,46 @@ export default function Testimonials() {
                   </p>
                 </div>
               </div>
-              <div style={{ display: "flex", gap: "4px" }}>
+              <div style={{ display: "flex", gap: "3px" }}>
                 {renderStars(testimonial.rating)}
               </div>
             </div>
 
-            {/* Testimonial text */}
             <p
               style={{
                 fontFamily: "'Cormorant Garamond', Georgia, serif",
-                fontSize: "1.1rem",
-                lineHeight: 1.6,
+                fontSize: "1rem",
+                lineHeight: 1.65,
                 color: "rgba(255,255,255,0.85)",
                 fontStyle: "italic",
-                marginBottom: "1.5rem"
+                marginBottom: "1.5rem",
+                minHeight: "100px"
               }}
             >
               "{testimonial.text}"
             </p>
 
-            {/* Footer with service and date */}
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
                 borderTop: "1px solid rgba(212,175,55,0.1)",
-                paddingTop: "1rem"
+                paddingTop: "1rem",
+                flexWrap: "wrap",
+                gap: "0.5rem"
               }}
             >
               <span
                 style={{
                   fontFamily: "'Space Mono', monospace",
-                  fontSize: "0.7rem",
+                  fontSize: "0.65rem",
                   color: "#D4AF37",
                   letterSpacing: "0.1em",
-                  textTransform: "uppercase"
+                  textTransform: "uppercase",
+                  background: "rgba(212,175,55,0.08)",
+                  padding: "4px 10px",
+                  borderRadius: "20px"
                 }}
               >
                 {testimonial.service}
@@ -361,7 +417,7 @@ export default function Testimonials() {
               <span
                 style={{
                   fontFamily: "'Space Mono', monospace",
-                  fontSize: "0.65rem",
+                  fontSize: "0.6rem",
                   color: "rgba(255,255,255,0.3)",
                   letterSpacing: "0.05em"
                 }}
@@ -373,15 +429,15 @@ export default function Testimonials() {
         ))}
       </div>
 
-      {/* Instagram Feed Section */}
+      {/* Social Feed Section */}
       <div
         ref={instaRef}
         style={{
           position: "relative",
           zIndex: 5,
           maxWidth: "1200px",
-          margin: "6rem auto 0",
-          padding: "0 2rem"
+          margin: "5rem auto 0",
+          padding: "0 1.5rem"
         }}
       >
         <div
@@ -390,14 +446,15 @@ export default function Testimonials() {
             alignItems: "center",
             justifyContent: "center",
             gap: "16px",
-            marginBottom: "2rem"
+            marginBottom: "2rem",
+            flexWrap: "wrap"
           }}
         >
           <div style={{ height: "1px", width: "48px", background: "rgba(212,175,55,0.3)" }} />
           <span
             style={{
               fontFamily: "'Space Mono', monospace",
-              fontSize: "10px",
+              fontSize: "9px",
               letterSpacing: "0.28em",
               color: "rgba(255,255,255,0.5)",
               textTransform: "uppercase"
@@ -411,7 +468,7 @@ export default function Testimonials() {
         <h3
           style={{
             fontFamily: "'Playfair Display', Georgia, serif",
-            fontSize: "clamp(1.5rem, 4vw, 2rem)",
+            fontSize: "clamp(1.3rem, 4vw, 1.8rem)",
             fontWeight: 600,
             color: "#ffffff",
             textAlign: "center",
@@ -421,56 +478,114 @@ export default function Testimonials() {
           @lntouch_officiel
         </h3>
 
+        {/* Social Posts Grid */}
         <div
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-            gap: "1rem",
-            marginBottom: "3rem"
+            gap: "1.5rem",
+            marginBottom: "3rem",
+            justifyItems: "center",
+            alignItems: "center"
           }}
         >
-          {[1, 2, 3, 4].map((i) => (
+          {socialPosts.map((post) => (
             <div
-              key={i}
+              key={post.id}
               style={{
                 position: "relative",
-                aspectRatio: "1",
-                background: "linear-gradient(135deg, #1a1a1a, #0a0a0a)",
+                width: "100%",
+                maxWidth: "350px",
+                background: "linear-gradient(135deg, #121212, #0a0a0a)",
                 borderRadius: "16px",
                 overflow: "hidden",
                 cursor: "pointer",
-                transition: "transform 0.3s ease"
+                transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.3)"
               }}
+              onClick={() => window.open(post.profileUrl, "_blank")}
               onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "scale(1.05)";
+                e.currentTarget.style.transform = "scale(1.02)";
+                e.currentTarget.style.boxShadow = "0 8px 30px rgba(212,175,55,0.15)";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = "scale(1)";
+                e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,0.3)";
               }}
             >
+              {/* Iframe embed pour Instagram/TikTok */}
               <div
                 style={{
-                  position: "absolute",
-                  inset: 0,
-                  background: "rgba(0,0,0,0.4)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  opacity: 0,
-                  transition: "opacity 0.3s ease"
+                  position: "relative",
+                  width: "100%",
+                  aspectRatio: "1",
+                  background: "#1a1a1a",
+                  overflow: "hidden"
                 }}
-                className="instagram-overlay"
               >
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="white">
-                  <path d="M12 2C9.5 2 9.2 2 7.7 2.1c-1.5.1-2.5.3-3.4.6-.9.3-1.7.8-2.5 1.6-.8.8-1.3 1.6-1.6 2.5-.3.9-.5 1.9-.6 3.4C2 9.2 2 9.5 2 12s0 2.8.1 4.3c.1 1.5.3 2.5.6 3.4.3.9.8 1.7 1.6 2.5.8.8 1.6 1.3 2.5 1.6.9.3 1.9.5 3.4.6 1.5.1 1.8.1 4.3.1s2.8 0 4.3-.1c1.5-.1 2.5-.3 3.4-.6.9-.3 1.7-.8 2.5-1.6.8-.8 1.3-1.6 1.6-2.5.3-.9.5-1.9.6-3.4.1-1.5.1-1.8.1-4.3s0-2.8-.1-4.3c-.1-1.5-.3-2.5-.6-3.4-.3-.9-.8-1.7-1.6-2.5-.8-.8-1.6-1.3-2.5-1.6-.9-.3-1.9-.5-3.4-.6C14.8 2 14.5 2 12 2zm0 2.5c2.4 0 2.7 0 4.3.1 1.4.1 2.1.3 2.6.5.6.2 1.1.5 1.6 1 .5.5.8 1 1 1.6.2.5.4 1.2.5 2.6.1 1.6.1 1.9.1 4.3s0 2.7-.1 4.3c-.1 1.4-.3 2.1-.5 2.6-.2.6-.5 1.1-1 1.6-.5.5-1 .8-1.6 1-.5.2-1.2.4-2.6.5-1.6.1-1.9.1-4.3.1s-2.7 0-4.3-.1c-1.4-.1-2.1-.3-2.6-.5-.6-.2-1.1-.5-1.6-1-.5-.5-.8-1-1-1.6-.2-.5-.4-1.2-.5-2.6-.1-1.6-.1-1.9-.1-4.3s0-2.7.1-4.3c.1-1.4.3-2.1.5-2.6.2-.6.5-1.1 1-1.6.5-.5 1-.8 1.6-1 .5-.2 1.2-.4 2.6-.5 1.6-.1 1.9-.1 4.3-.1z" />
-                  <path d="M12 7c-2.8 0-5 2.2-5 5s2.2 5 5 5 5-2.2 5-5-2.2-5-5-5zm0 8.2c-1.8 0-3.2-1.4-3.2-3.2s1.4-3.2 3.2-3.2 3.2 1.4 3.2 3.2-1.4 3.2-3.2 3.2zM17.5 7.5c0 .7-.6 1.3-1.3 1.3s-1.3-.6-1.3-1.3.6-1.3 1.3-1.3 1.3.6 1.3 1.3z" />
-                </svg>
+                <iframe
+                  src={post.embedUrl}
+                  title={`${post.type} post ${post.id}`}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "100%",
+                    border: "none",
+                    pointerEvents: "none" // Pour éviter les conflits de clic, on utilise le div parent pour le lien
+                  }}
+                  allowFullScreen
+                  loading="lazy"
+                />
+                
+                {/* Overlay avec le logo du réseau */}
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: "12px",
+                    right: "12px",
+                    background: "rgba(0,0,0,0.6)",
+                    borderRadius: "50%",
+                    width: "32px",
+                    height: "32px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backdropFilter: "blur(4px)"
+                  }}
+                >
+                  {post.type === "instagram" ? (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
+                      <path d="M12 2C9.5 2 9.2 2 7.7 2.1c-1.5.1-2.5.3-3.4.6-.9.3-1.7.8-2.5 1.6-.8.8-1.3 1.6-1.6 2.5-.3.9-.5 1.9-.6 3.4C2 9.2 2 9.5 2 12s0 2.8.1 4.3c.1 1.5.3 2.5.6 3.4.3.9.8 1.7 1.6 2.5.8.8 1.6 1.3 2.5 1.6.9.3 1.9.5 3.4.6 1.5.1 1.8.1 4.3.1s2.8 0 4.3-.1c1.5-.1 2.5-.3 3.4-.6.9-.3 1.7-.8 2.5-1.6.8-.8 1.3-1.6 1.6-2.5.3-.9.5-1.9.6-3.4.1-1.5.1-1.8.1-4.3s0-2.8-.1-4.3c-.1-1.5-.3-2.5-.6-3.4-.3-.9-.8-1.7-1.6-2.5-.8-.8-1.6-1.3-2.5-1.6-.9-.3-1.9-.5-3.4-.6C14.8 2 14.5 2 12 2zm0 2.5c2.4 0 2.7 0 4.3.1 1.4.1 2.1.3 2.6.5.6.2 1.1.5 1.6 1 .5.5.8 1 1 1.6.2.5.4 1.2.5 2.6.1 1.6.1 1.9.1 4.3s0 2.7-.1 4.3c-.1 1.4-.3 2.1-.5 2.6-.2.6-.5 1.1-1 1.6-.5.5-1 .8-1.6 1-.5.2-1.2.4-2.6.5-1.6.1-1.9.1-4.3.1s-2.7 0-4.3-.1c-1.4-.1-2.1-.3-2.6-.5-.6-.2-1.1-.5-1.6-1-.5-.5-.8-1-1-1.6-.2-.5-.4-1.2-.5-2.6-.1-1.6-.1-1.9-.1-4.3s0-2.7.1-4.3c.1-1.4.3-2.1.5-2.6.2-.6.5-1.1 1-1.6.5-.5 1-.8 1.6-1 .5-.2 1.2-.4 2.6-.5 1.6-.1 1.9-.1 4.3-.1z" />
+                      <path d="M12 7c-2.8 0-5 2.2-5 5s2.2 5 5 5 5-2.2 5-5-2.2-5-5-5zm0 8.2c-1.8 0-3.2-1.4-3.2-3.2s1.4-3.2 3.2-3.2 3.2 1.4 3.2 3.2-1.4 3.2-3.2 3.2zM17.5 7.5c0 .7-.6 1.3-1.3 1.3s-1.3-.6-1.3-1.3.6-1.3 1.3-1.3 1.3.6 1.3 1.3z" />
+                    </svg>
+                  ) : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+                      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25 4.83 4.83 0 0 1 3.77 4.25zM19.59 6.69a4.83 4.83 0 0 1-3.77-4.25 4.83 4.83 0 0 1 3.77 4.25zM12 2A10 10 0 0 0 2 12c0 1.76.46 3.42 1.27 4.86L2 22l5.14-1.27A9.97 9.97 0 0 0 12 22a10 10 0 0 0 10-10c0-5.52-4.48-10-10-10z" />
+                    </svg>
+                  )}
+                </div>
+              </div>
+              
+              <div
+                style={{
+                  padding: "12px",
+                  textAlign: "center",
+                  borderTop: "1px solid rgba(212,175,55,0.1)",
+                  fontFamily: "'Space Mono', monospace",
+                  fontSize: "9px",
+                  letterSpacing: "0.15em",
+                  color: "rgba(255,255,255,0.4)",
+                  textTransform: "uppercase"
+                }}
+              >
+                Voir sur {post.type === "instagram" ? "Instagram" : "TikTok"} →
               </div>
             </div>
           ))}
         </div>
 
-        {/* CTA Button */}
         <div style={{ textAlign: "center" }}>
           <a
             href="https://instagram.com/lntouch_officiel"
@@ -478,12 +593,12 @@ export default function Testimonials() {
             rel="noopener noreferrer"
             style={{
               display: "inline-block",
-              padding: "14px 36px",
+              padding: "12px 32px",
               border: "1px solid rgba(212,175,55,0.4)",
               background: "transparent",
               color: "white",
               fontFamily: "'Space Mono', monospace",
-              fontSize: "11px",
+              fontSize: "10px",
               letterSpacing: "0.22em",
               textTransform: "uppercase",
               textDecoration: "none",
@@ -510,8 +625,8 @@ export default function Testimonials() {
           position: "absolute",
           bottom: "5%",
           left: "2%",
-          width: "120px",
-          height: "120px",
+          width: "100px",
+          height: "100px",
           pointerEvents: "none",
           opacity: 0.3,
           animation: "testimonialFloat 6s ease-in-out infinite"
@@ -528,8 +643,8 @@ export default function Testimonials() {
           position: "absolute",
           bottom: "10%",
           right: "3%",
-          width: "80px",
-          height: "80px",
+          width: "70px",
+          height: "70px",
           pointerEvents: "none",
           opacity: 0.2,
           animation: "testimonialFloat 7s ease-in-out infinite reverse"
