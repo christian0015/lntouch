@@ -675,8 +675,8 @@ export default function Story() {
               </div>
             </div>
             <div style={{ flex: "0 0 42%", height: "100vh", position: "relative", overflow: "hidden" }}>
-              <ImgCard forwardRef={img1Ref} src="/images/fulani_braids.png" alt="Tresses artisanales LN Touch" label="Tresses artisanales" href="/galerie" style={{ opacity: 1, transition: "opacity 0.5s ease" }} />
-              <ImgCard forwardRef={img2Ref} src="/images/fulani_braids.png" alt="Style contemporain LN Touch" label="Style contemporain" href="/galerie" style={{ opacity: 0, transition: "opacity 0.5s ease" }} />
+              <ImgCard forwardRef={img1Ref} src="/og-image.png" alt="Logo LN Touch, Tresses artisanales LN Touch" label="Tresses artisanales" href="/coiffures" style={{ opacity: 1, transition: "opacity 0.5s ease" }} />
+              <ImgCard forwardRef={img2Ref} src="/images/fulani_braids.png" alt="Style contemporain LN Touch" label="Style contemporain" href="/coiffures" style={{ opacity: 0, transition: "opacity 0.5s ease" }} />
             </div>
           </div>
         </div>
