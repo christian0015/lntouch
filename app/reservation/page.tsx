@@ -1,3 +1,4 @@
+// app\reservation\page.tsx
 import type { Metadata } from "next";
 import Process from "@/components/sections/Process";
 

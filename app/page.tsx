@@ -8,17 +8,26 @@ import Testimonials from "@/components/sections/Testimonials";
 import Faq from "@/components/sections/Faq";
 import Footer from "@/components/sections/Footer";
 // import TesteTexte from "@/components/sections/testeTexte";
+import {COIFFURES, TESTIMONIALS, FAQ_ITEMS} from "@/lib/data0"
+import { useEffect } from "react";
+
+import { SALON, FOUNDER, DEVELOPER, SOCIAL_LINKS } from "@/lib/data0";
+
 
 export default function Page() {
+
+  useEffect(()=>{
+    // let data= getCoiffures()
+  })
   return (
     <main className="relative w-full min-h-screen bg-black overflow-hidden">
       <Hero />
       <Story/>
-      <Gallery/>
+      <Gallery coiffures={COIFFURES}/>
       <Process/>
-      <Testimonials/>
-      <Faq/>
-      <Footer/>
+      <Testimonials testimonials={TESTIMONIALS}/>
+      <Faq faqItems={FAQ_ITEMS} whatsapp={"02439999999"}/>
+      <Footer salon={SALON} founder={FOUNDER} socialLinks={SOCIAL_LINKS}/>
       {/* <TesteTexte /> */}
     </main>
   );

@@ -1,10 +1,10 @@
-// Footer.tsx
+// components\sections\Footer.tsx
 "use client";
 
 import { useRef, useEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
-import { SALON, FOUNDER, DEVELOPER, SOCIAL_LINKS } from "@/lib/data";
+import { SALON, FOUNDER, DEVELOPER, SOCIAL_LINKS } from "@/lib/data0";
 
 gsap.registerPlugin(ScrollTrigger);
 

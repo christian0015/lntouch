@@ -1,10 +1,9 @@
-// Testimonials.jsx
+// components\sections\Testimonials.jsx
 "use client";
 
 import { useRef, useEffect, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
-import { TESTIMONIALS } from "@/lib/data";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -46,7 +45,7 @@ const GLOBAL_STYLES = `
   }
 `;
 
-export default function Testimonials() {
+export default function Testimonials({ testimonials = [] }) {
   const sectionRef = useRef(null);
   const headerRef = useRef(null);
   const cardsRef = useRef([]);
@@ -268,7 +267,7 @@ export default function Testimonials() {
           alignItems: "stretch"
         }}
       >
-        {TESTIMONIALS.map((testimonial, index) => (
+        {testimonials.map((testimonial, index) => (
           <div
             key={testimonial.id}
             ref={(el) => { cardsRef.current[index] = el; }}

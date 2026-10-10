@@ -1,3 +1,4 @@
+// components\sections\Gallery.tsx
 "use client";
 
 import { useRef, useEffect, useState } from "react";
@@ -5,41 +6,41 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import ShinyText from "../Texts/ShinyText";
 import BlurText from "../Texts/BlurText";
-import { COIFFURES, type Coiffure } from "@/lib/data";
+import type { Coiffure } from "@/lib/data";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// ─── Construction des styles à partir de COIFFURES ─────────────────────────
-// Sélectionne 8 coiffures spécifiques pour la galerie, avec size "large" pour certaines
-const STYLES = COIFFURES.filter((c) =>
-  [
-    "knotless-braids-medium",
-    "knotless-braids-large",
-    "boho-braids-short",
-    "boho-braids-long",
-    "fulani-braids",
-    "fulani-crochet",
-    "braided-ponytail",
-    "french-curl",
-  ].includes(c.slug)
-).map((c, idx) => ({
-  id: c.slug,
-  name: c.name,
-  variant: c.variant,
-  tagline: c.tagline,
-  desc: c.description.split(".")[0] + ".", // Première phrase seulement
-  duration: c.duration,
-  hold: c.hold,
-  image: c.images[0],
-  instagram: c.instagram,
-  slug: c.slug,
-  accent: c.accent,
-  // size "large" pour certaines coiffures (même logique que l'original)
-  size: ["knotless-braids-medium", "boho-braids-long", "french-curl"].includes(c.slug) ? "large" : "normal",
-}));
+// ─── Type pour les items affichés dans la galerie ──────────────────────────
+interface GalleryStyle {
+  id: string;
+  name: string;
+  variant: string;
+  tagline: string;
+  desc: string;
+  duration: string;
+  hold: string;
+  image: string;
+  instagram: string;
+  slug: string;
+  accent: string;
+  size: "large" | "normal";
+}
+
+const GALLERY_SLUGS = [
+  "knotless-braids-medium",
+  "knotless-braids-large",
+  "boho-braids-short",
+  "boho-braids-long",
+  "fulani-braids",
+  "fulani-crochet",
+  "braided-ponytail",
+  "french-curl",
+];
+
+const LARGE_SLUGS = ["knotless-braids-medium", "boho-braids-long", "french-curl"];
 
 // ─── Card Component ───────────────────────────────────────────────────────────
-function StyleCard({ style, index }: { style: typeof STYLES[0]; index: number }) {
+function StyleCard({ style, index }: { style: GalleryStyle; index: number }) {
   const cardRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -380,7 +381,24 @@ function StyleCard({ style, index }: { style: typeof STYLES[0]; index: number })
 }
 
 // ─── Main Section ─────────────────────────────────────────────────────────────
-export default function Gallery() {
+export default function Gallery({ coiffures = [] }: { coiffures: Coiffure[] }) {
+  const STYLES: GalleryStyle[] = coiffures
+    .filter((c) => GALLERY_SLUGS.includes(c.slug))
+    .map((c) => ({
+      id: c.slug,
+      name: c.name,
+      variant: c.variant,
+      tagline: c.tagline,
+      desc: c.description.split(".")[0] + ".",
+      duration: c.duration,
+      hold: c.hold,
+      image: c.images[0],
+      instagram: c.instagram,
+      slug: c.slug,
+      accent: c.accent,
+      size: LARGE_SLUGS.includes(c.slug) ? "large" : "normal",
+    }));
+
   const sectionRef = useRef<HTMLElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const lineRef = useRef<HTMLDivElement>(null);

@@ -1,3 +1,4 @@
+// components\sections\Story.jsx
 "use client";
 
 import { useRef, useEffect, useState } from "react";
