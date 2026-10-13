@@ -1,4 +1,5 @@
 // components/sections/Faq.tsx
+// components/sections/Faq.tsx
 "use client";
 
 import { useRef, useEffect, useState } from "react";
@@ -25,12 +26,11 @@ interface FAQProps {
 }
 
 export default function FAQ({ faqItems, whatsapp }: FAQProps) {
-  console.log("FAQ Component Props:", { faqItems, whatsapp });
   const sectionRef   = useRef(null);
   const headerRef    = useRef(null);
   const itemsRef     = useRef<(HTMLDivElement | null)[]>([]);
   const whatsappRef  = useRef(null);
-  const [activeId, setActiveId] = useState<number | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(null);
   const [message, setMessage]   = useState("");
 
   useEffect(() => {
@@ -147,7 +147,7 @@ export default function FAQ({ faqItems, whatsapp }: FAQProps) {
                   </svg>
                 </div>
               </div>
-              <div className="faq-answer" style={{ maxHeight: activeId === item.id ? "200px" : "0", opacity: activeId === item.id ? 1 : 0, overflow: "hidden", marginTop: activeId === item.id ? "1rem" : "0", transition: "all 0.4s cubic-bezier(0.23, 1, 0.32, 1)" }}>
+              <div className="faq-answer" style={{ maxHeight: activeId === item.id ? "600px" : "0", opacity: activeId === item.id ? 1 : 0, overflow: "hidden", marginTop: activeId === item.id ? "1rem" : "0", transition: "all 0.4s cubic-bezier(0.23, 1, 0.32, 1)" }}>
                 <p style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "1rem", fontStyle: "italic", color: "rgba(255,255,255,0.6)", lineHeight: 1.7, margin: 0, borderLeft: "2px solid rgba(212,175,55,0.3)", paddingLeft: "1rem" }}>{item.answer}</p>
               </div>
             </div>

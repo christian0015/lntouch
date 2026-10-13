@@ -1,25 +1,18 @@
-// app\reservation\page.tsx
+// app/reservation/page.tsx
 import type { Metadata } from "next";
 import Process from "@/components/sections/Process";
+import { getBookableAvailabilities, getCoiffures, getExtras, getSalon } from "@/lib/data";
 
+export const revalidate = 600;
 export const metadata: Metadata = {
-  title: "Réservation | LN Touch",
-  description: "Réservez votre séance de coiffure chez LN Touch. Box Braids, Knotless Braids, Fulani Braids et plus encore.",
-  openGraph: {
-    title: "Réservation LN Touch",
-    description: "Réservez votre séance de coiffure en ligne.",
-    type: "website",
-    locale: "fr_FR",
-    siteName: "LN Touch",
-  },
-  alternates: {
-    canonical: "/reservation",
-  },
+  title: "Réserver | LN Touch",
+  description: "Réservez votre séance de coiffure chez LN Touch en quelques clics.",
+  alternates: { canonical: "/reservation" },
 };
 
-const App = () =>{
-    return(
-        <Process/>
-    )
+export default async function ReservationPage() {
+  const [coiffures, extras, availabilities, salon] = await Promise.all([
+    getCoiffures(), getExtras(), getBookableAvailabilities(), getSalon(),
+  ]);
+  return <Process coiffures={coiffures} extras={extras} availabilities={availabilities} salon={salon} />;
 }
-export default App;

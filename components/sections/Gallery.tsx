@@ -26,17 +26,6 @@ interface GalleryStyle {
   size: "large" | "normal";
 }
 
-const GALLERY_SLUGS = [
-  "knotless-braids-medium",
-  "knotless-braids-large",
-  "boho-braids-short",
-  "boho-braids-long",
-  "fulani-braids",
-  "fulani-crochet",
-  "braided-ponytail",
-  "french-curl",
-];
-
 const LARGE_SLUGS = ["knotless-braids-medium", "boho-braids-long", "french-curl"];
 
 // ─── Card Component ───────────────────────────────────────────────────────────
@@ -381,9 +370,8 @@ function StyleCard({ style, index }: { style: GalleryStyle; index: number }) {
 }
 
 // ─── Main Section ─────────────────────────────────────────────────────────────
-export default function Gallery({ coiffures = [] }: { coiffures: Coiffure[] }) {
+export default function Gallery({ coiffures = [] }: { coiffures?: Coiffure[] }) {
   const STYLES: GalleryStyle[] = coiffures
-    .filter((c) => GALLERY_SLUGS.includes(c.slug))
     .map((c) => ({
       id: c.slug,
       name: c.name,
@@ -392,7 +380,7 @@ export default function Gallery({ coiffures = [] }: { coiffures: Coiffure[] }) {
       desc: c.description.split(".")[0] + ".",
       duration: c.duration,
       hold: c.hold,
-      image: c.images[0],
+      image: c.images?.[0] ?? "",
       instagram: c.instagram,
       slug: c.slug,
       accent: c.accent,

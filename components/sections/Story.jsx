@@ -1,3 +1,4 @@
+// components/sections/Story.jsx
 // components\sections\Story.jsx
 "use client";
 

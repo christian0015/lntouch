@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "create-owner": "tsx --env-file=.env.local scripts/create-owner.ts",
+    "seed": "tsx --env-file=.env.local scripts/seed.ts"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
@@ -25,6 +27,7 @@
     "mongoose": "^9.7.0",
     "motion": "^12.38.0",
     "next": "16.1.6",
+    "nodemailer": "^10.1.0",
     "r3f-perf": "^7.2.3",
     "react": "19.2.3",
     "react-dom": "19.2.3",
@@ -34,11 +37,13 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/nodemailer": "^8.0.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "tailwindcss": "^4",
+    "tsx": "^4.23.15",
     "typescript": "^5"
   }
 }

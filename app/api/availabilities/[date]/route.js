@@ -1,43 +1,35 @@
 // app/api/availabilities/[date]/route.js
 import { NextResponse } from "next/server";
+import { ApiError, handle, readJson, plain, NO_STORE } from "@/lib/api";
+import { authorize } from "@/lib/auth/guard";
 import { connectToDatabase } from "@/lib/mongoose";
 import Availability from "@/models/Availability";
+import { availabilitySchema, dateISO } from "@/lib/validation";
+import { invalidate } from "@/lib/cache";
 
-// GET /api/availabilities/:date
-export async function GET(_, { params }) {
-  try {
-    await connectToDatabase();
-    const doc = await Availability.findOne({ date: params.date }).lean();
-    if (!doc) return NextResponse.json({ date: params.date, slots: [] });
-    return NextResponse.json(doc);
-  } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
-  }
-}
+export const GET = handle(async (_req, { params }) => {
+  const date = dateISO.parse((await params).date);
+  await connectToDatabase();
+  const doc = await Availability.findOne({ date }).lean();
+  return NextResponse.json(doc ? plain(doc) : { date, slots: [] }, { headers: { "Cache-Control": "public, s-maxage=15" } });
+});
 
-// PUT /api/availabilities/:date — remplace les slots
-export async function PUT(request, { params }) {
-  try {
-    await connectToDatabase();
-    const { slots } = await request.json();
-    const doc = await Availability.findOneAndUpdate(
-      { date: params.date },
-      { slots: slots ?? [] },
-      { new: true, upsert: true, runValidators: true }
-    ).lean();
-    return NextResponse.json(doc);
-  } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 400 });
-  }
-}
+export const PUT = handle(async (req, { params }) => {
+  await authorize(req, "availability:manage");
+  const date = dateISO.parse((await params).date);
+  const { slots } = await readJson(req, availabilitySchema.omit({ date: true }));
+  await connectToDatabase();
+  const doc = await Availability.findOneAndUpdate({ date }, { date, slots }, { upsert: true, new: true, runValidators: true }).lean();
+  invalidate("availabilities");
+  return NextResponse.json(plain(doc), { headers: NO_STORE });
+});
 
-// DELETE /api/availabilities/:date — supprime le jour entier
-export async function DELETE(_, { params }) {
-  try {
-    await connectToDatabase();
-    await Availability.findOneAndDelete({ date: params.date });
-    return NextResponse.json({ deleted: true });
-  } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
-  }
-}
+export const DELETE = handle(async (req, { params }) => {
+  await authorize(req, "availability:manage");
+  const date = dateISO.parse((await params).date);
+  await connectToDatabase();
+  const r = await Availability.findOneAndDelete({ date });
+  if (!r) throw new ApiError(404, "Introuvable");
+  invalidate("availabilities");
+  return NextResponse.json({ deleted: true }, { headers: NO_STORE });
+});

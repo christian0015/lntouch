@@ -1,3 +1,4 @@
+// app/coiffures/[slug]/CoiffureClient.tsx
 "use client";
 
 // app/coiffures/[slug]/CoiffureClient.tsx

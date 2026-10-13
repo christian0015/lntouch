@@ -1,4 +1,5 @@
 // components/sections/Process.tsx
+// components/sections/Process.tsx
 "use client";
 
 import { useRef, useEffect, useState, useCallback } from "react";
@@ -42,17 +43,6 @@ const STEPS = [
   { id: 3, label: "Créneau",      short: "Date & heure" },
   { id: 4, label: "Contact",      short: "Qui êtes-vous ?" },
   { id: 5, label: "Confirmation", short: "C'est parti !" },
-];
-
-const SLUG_WHITELIST = [
-  "knotless-braids-medium",
-  "knotless-braids-large",
-  "boho-braids-short",
-  "boho-braids-long",
-  "fulani-braids",
-  "fulani-crochet",
-  "braided-ponytail",
-  "french-curl",
 ];
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -539,6 +529,15 @@ export default function Process({
   availabilities = {},
   salon       = null,
 }: ProcessProps) {
+  const [liveAvailabilities, setLiveAvailabilities] = useState<Record<string, string[]>>(availabilities);
+  const refreshAvailabilities = useCallback(async () => {
+    try {
+      const res = await fetch("/api/availabilities", { cache: "no-store" });
+      if (res.ok) setLiveAvailabilities(await res.json());
+    } catch { /* on garde les données du serveur */ }
+  }, []);
+  useEffect(() => { refreshAvailabilities(); }, [refreshAvailabilities]);
+
   const sectionRef   = useRef<HTMLElement>(null);
   const leftRef      = useRef<HTMLDivElement>(null);
   const rightRef     = useRef<HTMLDivElement>(null);
@@ -546,10 +545,9 @@ export default function Process({
 
   // Construction de STYLES à partir des coiffures injectées
   const STYLES = coiffures
-    .filter((c) => SLUG_WHITELIST.includes(c.slug))
     .map((c) => ({
       id: c.slug, name: `${c.name} ${c.variant}`,
-      image: c.images[0], duration: c.duration,
+      image: c.images?.[0] ?? "", duration: c.duration,
       price: c.price, accent: c.accent,
     }));
 
@@ -611,10 +609,11 @@ export default function Process({
       }),
     });
     if (!res.ok) {
-      const { error } = await res.json();
+      const { error } = await res.json().catch(() => ({ error: "" }));
+      if (res.status === 409) refreshAvailabilities(); // créneau pris entre-temps → on recharge le calendrier
       throw new Error(error || "Erreur serveur");
     }
-  }, []);
+  }, [refreshAvailabilities]);
 
   return (
     <section ref={sectionRef} style={{ position: "relative", background: "linear-gradient(135deg, #0c0c0c 0%, #0a0a0a 60%, #0f0808 100%)", minHeight: "100vh", overflow: "hidden" }}>
@@ -662,7 +661,7 @@ export default function Process({
         >
           {step === 1 && <StepStyle data={formData} onChange={update} onNext={() => setStep(2)} onSkip={() => setStep(2)} preselectedStyle={preselectedStyleId} styles={STYLES} />}
           {step === 2 && <StepExtras data={formData} onChange={update} onNext={() => setStep(3)} onBack={() => setStep(1)} extraOptions={extras} />}
-          {step === 3 && <StepCreneau data={formData} onChange={update} onNext={() => setStep(4)} onBack={() => setStep(2)} availabilities={availabilities} salon={salon} />}
+          {step === 3 && <StepCreneau data={formData} onChange={update} onNext={() => setStep(4)} onBack={() => setStep(2)} availabilities={liveAvailabilities} salon={salon} />}
           {step === 4 && <StepContact data={formData} onChange={update} onNext={() => setStep(5)} onBack={() => setStep(3)} />}
           {step === 5 && <StepConfirm data={formData} onBack={() => setStep(4)} onSubmit={handleSubmit} styles={STYLES} extraOptions={extras} />}
         </div>

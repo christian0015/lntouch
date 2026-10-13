@@ -1,42 +1,86 @@
 // app/api/reservations/[id]/route.js
 import { NextResponse } from "next/server";
+import mongoose from "mongoose";
+import { ApiError, handle, readJson, plain, NO_STORE } from "@/lib/api";
+import { authorize } from "@/lib/auth/guard";
 import { connectToDatabase } from "@/lib/mongoose";
 import Reservation from "@/models/Reservation";
+import Hairstyle from "@/models/Hairstyle";
+import Extra from "@/models/Extra";
+import Availability from "@/models/Availability";
+import { reservationUpdate } from "@/lib/validation";
+import { todayISO } from "@/lib/dates";
+import { invalidate } from "@/lib/cache";
+import { sendMail } from "@/lib/mail/send";
+import { siteUrl } from "@/lib/mail/transport";
+import { clientStatus } from "@/lib/mail/templates";
 
-export async function GET(_, { params }) {
-  try {
-    await connectToDatabase();
-    const r = await Reservation.findById(params.id).lean();
-    if (!r) return NextResponse.json({ error: "Not found" }, { status: 404 });
-    return NextResponse.json(r);
-  } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
-  }
+async function load(id) {
+  if (!mongoose.isValidObjectId(id)) throw new ApiError(404, "Introuvable");
+  await connectToDatabase();
+  const r = await Reservation.findById(id).select("+viewToken");
+  if (!r) throw new ApiError(404, "Introuvable");
+  return r;
 }
 
-// PUT — principalement pour changer le status (confirmed / cancelled)
-export async function PUT(request, { params }) {
-  try {
-    await connectToDatabase();
-    const body = await request.json();
-    const r = await Reservation.findByIdAndUpdate(params.id, body, {
-      new: true,
-      runValidators: true,
-    }).lean();
-    if (!r) return NextResponse.json({ error: "Not found" }, { status: 404 });
-    return NextResponse.json(r);
-  } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 400 });
-  }
-}
+export const GET = handle(async (req, { params }) => {
+  await authorize(req, "reservations:manage");
+  const r = await load((await params).id);
+  const o = r.toObject(); delete o.viewToken;
+  return NextResponse.json(plain(o), { headers: NO_STORE });
+});
 
-export async function DELETE(_, { params }) {
-  try {
-    await connectToDatabase();
-    const deleted = await Reservation.findByIdAndDelete(params.id);
-    if (!deleted) return NextResponse.json({ error: "Not found" }, { status: 404 });
-    return NextResponse.json({ deleted: true });
-  } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+// PUT — statut (pending/confirmed/cancelled) et note interne. Gère le créneau et prévient le client par email.
+export const PUT = handle(async (req, { params }) => {
+  await authorize(req, "reservations:manage");
+  const r = await load((await params).id);
+  const patch = await readJson(req, reservationUpdate);
+  const prev = r.status;
+
+  if (patch.status && patch.status !== prev) {
+    if (patch.status === "cancelled") {
+      if (r.date >= todayISO()) {
+        await Availability.updateOne({ date: r.date }, { $addToSet: { slots: r.time } }, { upsert: true });
+        invalidate("availabilities");
+      }
+    } else if (prev === "cancelled") {
+      // Réactivation : le créneau doit encore être libre.
+      const claimed = await Availability.findOneAndUpdate({ date: r.date, slots: r.time }, { $pull: { slots: r.time } });
+      if (!claimed && r.date >= todayISO()) {
+        // Créneau déjà repris ou fermé : on laisse passer seulement s'il n'existe aucune autre résa active dessus.
+        const clash = await Reservation.exists({ _id: { $ne: r._id }, date: r.date, time: r.time, status: { $ne: "cancelled" } });
+        if (clash) throw new ApiError(409, "Ce créneau est déjà occupé par une autre réservation.");
+      }
+      invalidate("availabilities");
+    }
+    r.status = patch.status;
   }
-}
+  if (patch.adminNote !== undefined) r.adminNote = patch.adminNote;
+  await r.save();
+
+  if (patch.status && patch.status !== prev && r.email && ["confirmed", "cancelled"].includes(patch.status)) {
+    const [style, extras] = await Promise.all([
+      Hairstyle.findOne({ slug: r.hairstyleSlug }).select("name variant").lean(),
+      Extra.find({ id: { $in: r.extras } }).select("label").lean(),
+    ]);
+    await sendMail(r.email, clientStatus({
+      ref: r.ref, styleName: style ? `${style.name} ${style.variant}` : r.hairstyleSlug,
+      date: r.date, time: r.time, extras: extras.map((e) => e.label), customNote: r.customNote,
+      trackUrl: `${siteUrl()}/suivi/${r.viewToken}`,
+    }, patch.status));
+  }
+
+  const o = r.toObject(); delete o.viewToken;
+  return NextResponse.json(plain(o), { headers: NO_STORE });
+});
+
+export const DELETE = handle(async (req, { params }) => {
+  await authorize(req, "reservations:manage");
+  const r = await load((await params).id);
+  if (r.status !== "cancelled" && r.date >= todayISO()) {
+    await Availability.updateOne({ date: r.date }, { $addToSet: { slots: r.time } }, { upsert: true });
+    invalidate("availabilities");
+  }
+  await r.deleteOne();
+  return NextResponse.json({ deleted: true }, { headers: NO_STORE });
+});

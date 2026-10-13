@@ -5,15 +5,19 @@ const STATUSES = ["pending", "confirmed", "cancelled"];
 
 const ReservationSchema = new mongoose.Schema(
   {
-    // Référence au slug (pas à l'_id, cohérent avec related[] dans Hairstyle)
+    // Référence courte lisible ("LN-7K2Q9F") communiquée au client et à la réception.
+    ref:           { type: String, required: true, unique: true },
+    // Jeton secret (non devinable) du lien de suivi envoyé par email.
+    viewToken:     { type: String, required: true, unique: true, select: false },
     hairstyleSlug: { type: String, required: true },
-    extras:        [{ type: String }],   // ids des extras choisis
+    extras:        [{ type: String }],
     customNote:    { type: String },
     date:          { type: String, required: true }, // "2026-05-01"
     time:          { type: String, required: true }, // "10:00"
     email:         { type: String },
     phone:         { type: String },
     status:        { type: String, enum: STATUSES, default: "pending" },
+    adminNote:     { type: String },
   },
   { timestamps: true }
 );

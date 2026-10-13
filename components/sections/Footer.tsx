@@ -1,14 +1,31 @@
+// components/sections/Footer.tsx
 // components\sections\Footer.tsx
 "use client";
 
 import { useRef, useEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
-import { SALON, FOUNDER, DEVELOPER, SOCIAL_LINKS } from "@/lib/data0";
+import { DEVELOPER } from "@/lib/constants";
+import type { SalonInfo, FounderInfo, SocialLink } from "@/lib/types";
 
 gsap.registerPlugin(ScrollTrigger);
 
-export default function Footer() {
+const EMPTY_SALON: SalonInfo = {
+  name: "", commune: "", quartier: "", detail: "", mapLink: "#", phone: "", email: "", whatsapp: "",
+  hours: { mardi_samedi: "", dimanche_lundi: "Fermé" },
+};
+const EMPTY_FOUNDER: FounderInfo = { name: "", role: "", bio: "", experience: "" };
+
+interface FooterProps {
+  salon?: SalonInfo | null;
+  founder?: FounderInfo | null;
+  socialLinks?: SocialLink[];
+}
+
+export default function Footer({ salon, founder, socialLinks }: FooterProps) {
+  const SALON = salon ?? EMPTY_SALON;
+  const FOUNDER = founder ?? EMPTY_FOUNDER;
+  const SOCIAL_LINKS = socialLinks ?? [];
   const footerRef = useRef(null);
   const contentRef = useRef(null);
   const year = new Date().getFullYear();
