@@ -76,6 +76,7 @@ export function handle(fn: Handler): Handler {
 /** JSON plain : ObjectId → string, Date → ISO, retire __v. */
 export function plain<T = any>(doc: unknown): T {
   const obj = JSON.parse(JSON.stringify(doc));
-  if (obj && typeof obj === "object") delete (obj as any).__v;
+  const strip = (o: any) => { if (o && typeof o === "object") delete o.__v; };
+  Array.isArray(obj) ? obj.forEach(strip) : strip(obj);
   return obj as T;
 }

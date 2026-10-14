@@ -6,7 +6,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import ShinyText from "../Texts/ShinyText";
 import BlurText from "../Texts/BlurText";
-import type { Coiffure } from "@/lib/data";
+import type { Coiffure } from "@/lib/types";
 
 gsap.registerPlugin(ScrollTrigger);
 

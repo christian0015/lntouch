@@ -13,13 +13,17 @@ export const TAGS = {
 } as const;
 export type Tag = (typeof TAGS)[keyof typeof TAGS];
 
+// En développement le cache est quasi désactivé (1 s) : sinon un résultat vide mis en cache avant
+// le seed reste figé pendant 1 h et le site paraît "sans données".
+const DEV = process.env.NODE_ENV !== "production";
+
 export function cached<A extends unknown[], R>(
   fn: (...args: A) => Promise<R>,
   keyParts: string[],
   tags: Tag[],
   revalidate = 3600
 ) {
-  return unstable_cache(fn, keyParts, { tags, revalidate });
+  return unstable_cache(fn, keyParts, { tags, revalidate: DEV ? 1 : revalidate });
 }
 
 /**

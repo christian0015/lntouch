@@ -1,35 +1,7 @@
-// app/reservation/page.tsx
-import type { Metadata } from "next";
-import Process from "@/components/sections/Process";
-import { getCoiffures, getExtras, getAvailabilities, getSalon } from "@/lib/data";
+// app/reservations/page.tsx
+// Ancienne URL (pluriel) conservée : redirige vers /reservation.
+import { permanentRedirect } from "next/navigation";
 
-export const metadata: Metadata = {
-  title: "Réservation | LN Touch",
-  description: "Réservez votre séance de coiffure chez LN Touch. Box Braids, Knotless Braids, Fulani Braids et plus encore.",
-  openGraph: {
-    title: "Réservation LN Touch",
-    description: "Réservez votre séance de coiffure en ligne.",
-    type: "website",
-    locale: "fr_FR",
-    siteName: "LN Touch",
-  },
-  alternates: { canonical: "/reservation" },
-};
-
-export default async function ReservationPage() {
-  const [coiffures, extras, availabilities, salon] = await Promise.all([
-    getCoiffures(),
-    getExtras(),
-    getAvailabilities(),
-    getSalon(),
-  ]);
-
-  return (
-    <Process
-      coiffures={coiffures}
-      extras={extras}
-      availabilities={availabilities}
-      salon={salon}
-    />
-  );
+export default function OldReservationsPage() {
+  permanentRedirect("/reservation");
 }

@@ -825,7 +825,7 @@ function ContactItem({ icon, text, href }) {
   );
 }
 
-function ScheduleItem({ day, hours, isClosed, special }) {
+function ScheduleItem({ day, hours, isClosed, special }: { day: string; hours: string; isClosed?: boolean; special?: boolean }) {
   return (
     <div
       style={{

@@ -28,7 +28,7 @@ Gmail : activez la validation en 2 étapes puis créez un « mot de passe d'appl
 - `lib/data0.ts` n'est plus utilisé : vous pouvez le supprimer (copie conservée dans `scripts/seed-data.ts`).
 - `lib/coiffures.ts`, si inutilisé, peut aussi disparaître.
 - `lib/mongoose.js`, `lib/cloudinary.js` et `lib/gsap.js` sont conservés tels quels (non fournis dans le zip).
-- `middleware.ts` : sur **Next 16**, renommez-le `proxy.ts` et la fonction `middleware` en `proxy`.
+- `proxy.ts` (Next 16) : supprimez votre ancien `middleware.ts` s’il existe encore, il ne doit rester que `proxy.ts`.
 
 ## 5. Premier démarrage
 ```bash

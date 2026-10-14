@@ -7,7 +7,7 @@ import { useRef, useEffect, useState } from "react";
 import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
-import type { Coiffure } from "@/lib/data";
+import type { Coiffure } from "@/lib/types";
 
 gsap.registerPlugin(ScrollTrigger);
 
