@@ -24,7 +24,7 @@ const founderFields: Field[] = [
   { name: "name", label: "Nom", type: "text" },
   { name: "role", label: "Rôle", type: "text" },
   { name: "experience", label: "Expérience", type: "text", placeholder: "18 ans d'expertise" },
-  { name: "avatar", label: "Photo", type: "image", scope: "founder" },
+  { name: "avatar", idsName: "avatarPublicId", scope: "founder", label: "Photo", type: "image" },
   { name: "bio", label: "Biographie", type: "textarea" },
   { name: "socialLinks", label: "Réseaux sociaux", type: "social" },
 ];

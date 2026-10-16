@@ -24,6 +24,12 @@ interface Config {
   publicSelect?: string;            // champs masqués au public, ex: "-imagePublicIds"
   afterUpdate?: (before: any, after: any) => Promise<void>;
   afterDelete?: (doc: any) => Promise<void>;
+  /** Champ publicId unique (string) à nettoyer quand il change — pour avatar, thumbnailPublicId… */
+  imagePublicIdField?: string;
+  imageTypeField?: string;
+  /** Champ publicId unique (string) à nettoyer quand il change — pour avatar, thumbnailPublicId, etc. */
+  imagePublicIdField?: string;
+  imageTypeField?: string;  // si le type (image/video) est stocké séparément
 }
 
 async function wantsAll(req: Request, permission: Permission) {
@@ -83,9 +89,20 @@ export function itemRoutes(c: Config) {
     const data = await readJson(req, c.updateSchema);
     await connectToDatabase();
     const filter = filterFor(c, key);
-    const before = c.afterUpdate ? await c.model.findOne(filter).lean() : null;
+    const needsBefore = !!(c.afterUpdate || c.imagePublicIdField);
+    const before: any = needsBefore ? await c.model.findOne(filter).lean() : null;
     const doc = await c.model.findOneAndUpdate(filter, { $set: data }, { new: true, runValidators: true }).lean();
     if (!doc) throw new ApiError(404, "Introuvable");
+    // Nettoyage d'un champ publicId unique (avatar, couverture…) quand il a changé
+    if (c.imagePublicIdField && before) {
+      const oldId = before[c.imagePublicIdField];
+      const newId = (doc as any)[c.imagePublicIdField];
+      if (oldId && oldId !== newId) {
+        const { deleteImage } = await import("@/lib/cloudinary");
+        const type = c.imageTypeField ? before[c.imageTypeField] : "image";
+        await deleteImage(oldId, type).catch((e: any) => console.error("[crud] deleteImage", e));
+      }
+    }
     if (c.afterUpdate && before) await c.afterUpdate(before, doc).catch((e) => console.error("[afterUpdate]", e));
     invalidate(c.tag);
     return NextResponse.json(plain(doc), { headers: NO_STORE });
@@ -107,7 +124,10 @@ export function itemRoutes(c: Config) {
 }
 
 /** Singleton (salon, fondatrice) : GET public, PUT protégé (upsert). */
-export function singletonRoutes(opts: { model: any; tag: Tag; permission: Permission; schema: ZodType<any> }) {
+export function singletonRoutes(opts: {
+  model: any; tag: Tag; permission: Permission; schema: ZodType<any>;
+  imagePublicIdField?: string; imageTypeField?: string;
+}) {
   const GET = handle(async () => {
     await connectToDatabase();
     const doc = await opts.model.findOne().select("-createdAt -updatedAt").lean();
@@ -121,6 +141,17 @@ export function singletonRoutes(opts: { model: any; tag: Tag; permission: Permis
     const data = await readJson(req, opts.schema);
     await connectToDatabase();
     const existing = await opts.model.findOne().select("_id").lean();
+    // Nettoyage de l'ancienne image si le publicId a changé
+    if (opts.imagePublicIdField && existing) {
+      const prev: any = await opts.model.findById(existing._id).lean();
+      const oldId = prev?.[opts.imagePublicIdField];
+      const newId = data[opts.imagePublicIdField];
+      if (oldId && newId !== undefined && oldId !== newId) {
+        const { deleteImage } = await import("@/lib/cloudinary");
+        const type = opts.imageTypeField ? prev?.[opts.imageTypeField] : "image";
+        await deleteImage(oldId, type).catch((e: any) => console.error("[singleton] deleteImage", e));
+      }
+    }
     const doc = existing
       ? await opts.model.findByIdAndUpdate(existing._id, { $set: data }, { new: true, runValidators: true }).lean()
       : (await opts.model.create(data)).toObject();

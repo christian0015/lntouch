@@ -7,6 +7,7 @@ const h = itemRoutes({
   model: Testimonial, tag: "testimonials", permission: "content:write",
   createSchema: testimonialSchema, updateSchema: testimonialUpdate, keyField: "_id",
   publicSelect: "-createdAt -updatedAt",
+  imagePublicIdField: "avatarPublicId",
 });
 const wrap = (fn) => async (req, { params }) => fn(req, { params: params.then(({ id }) => ({ key: id })) });
 export const GET = wrap(h.GET);

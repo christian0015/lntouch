@@ -10,7 +10,7 @@ const fields: Field[] = [
   { name: "rating", label: "Note (1-5)", type: "number" },
   { name: "service", label: "Coiffure réalisée", type: "text" },
   { name: "date", label: "Date affichée", type: "text", placeholder: "Il y a 2 semaines" },
-  { name: "avatar", label: "Photo", type: "image", scope: "testimonials" },
+  { name: "avatar", idsName: "avatarPublicId", scope: "testimonials", label: "Photo", type: "image" },
   { name: "text", label: "Témoignage", type: "textarea" },
   { name: "order", label: "Ordre", type: "number" },
   { name: "active", label: "Visible", type: "checkbox" },

@@ -23,7 +23,8 @@ const FounderSchema = new mongoose.Schema(
     role:         { type: String, required: true },
     bio:          { type: String, required: true },
     experience:   { type: String },           // "18 ans d'expertise"
-    avatar:       { type: String },           // URL Cloudinary optionnelle
+    avatar:         { type: String },
+    avatarPublicId: { type: String },           // URL Cloudinary optionnelle
     socialLinks:  [SocialLinkSchema],
   },
   { timestamps: true }

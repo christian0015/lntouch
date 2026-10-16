@@ -56,6 +56,7 @@ export const testimonialSchema = z.object({
   rating: z.number().int().min(1).max(5).optional(),
   text: text(800), date: optText(60),
   avatar: z.string().trim().max(600).refine((v) => v === "" || /^https:\/\//.test(v) || /^\/(?!\/)/.test(v)).optional(),
+  avatarPublicId: z.string().trim().max(250).optional(),
   service: optText(120),
   order, active: z.boolean().optional(),
 }).strict();
@@ -78,6 +79,7 @@ export const salonSchema = z.object({
 export const founderSchema = z.object({
   name: text(80), role: text(120), bio: text(1500), experience: optText(80),
   avatar: z.string().trim().max(600).optional(),
+  avatarPublicId: z.string().trim().max(250).optional(),
   socialLinks: z.array(z.object({
     platform: z.enum(["instagram", "facebook", "tiktok", "pinterest"]),
     href: z.string().trim().max(400).regex(/^https?:\/\//, "URL invalide"),

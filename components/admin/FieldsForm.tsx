@@ -156,6 +156,12 @@ export default function FieldsForm({ fields, values, onChange, slugForUpload }: 
                       <div className="adm-thumb-actions">
                         {i > 0 && <button type="button" title="Mettre en couverture" onClick={() => { const a = [...val]; const [x] = a.splice(i, 1); a.unshift(x); set(f.name, a); }}>★</button>}
                         <button type="button" title="Retirer" onClick={() => {
+                          // Supprimer sur Cloudinary immédiatement (avant save), sinon l'image reste orpheline si le modal est fermé.
+                          if (f.idsName) {
+                            const ids: string[] = getPath(values, f.idsName) || [];
+                            const hit = ids.find((id: string) => url.includes(id));
+                            if (hit) api(`/api/upload?publicId=${encodeURIComponent(hit)}&type=image`, "DELETE").catch(() => {});
+                          }
                           set(f.name, val.filter((_: string, j: number) => j !== i));
                           if (f.idsName) set(f.idsName, (getPath(values, f.idsName) || []).filter((id: string) => !url.includes(id)));
                         }}>✕</button>
@@ -178,6 +184,10 @@ export default function FieldsForm({ fields, values, onChange, slugForUpload }: 
                   onChange={(e) => { upload(f, e.target.files); e.target.value = ""; }} />
                 {busy === f.name && <span className="adm-muted">Envoi…</span>}
                 {val && <button type="button" className="adm-btn adm-btn-ghost" onClick={() => {
+                  // Supprimer immédiatement sur Cloudinary
+                  const pid = f.idsName ? getPath(values, f.idsName) : null;
+                  const typ = f.typeName ? getPath(values, f.typeName) : "image";
+                  if (pid) api(`/api/upload?publicId=${encodeURIComponent(pid)}&type=${typ || "image"}`, "DELETE").catch(() => {});
                   set(f.name, ""); if (f.idsName) set(f.idsName, ""); if (f.typeName) set(f.typeName, "image");
                 }}>Retirer</button>}
               </div>
