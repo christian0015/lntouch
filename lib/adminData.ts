@@ -39,7 +39,7 @@ export async function adminReservations(opts: { status?: string; page?: number; 
   const filter: Record<string, unknown> = {};
   if (opts.status && ["pending", "confirmed", "cancelled"].includes(opts.status)) filter.status = opts.status;
   const [items, total, counts] = await Promise.all([
-    Reservation.find(filter).sort({ date: -1, time: -1 }).skip((page - 1) * limit).limit(limit).lean(),
+    Reservation.find(filter).select("+viewToken").sort({ date: -1, time: -1 }).skip((page - 1) * limit).limit(limit).lean(),
     Reservation.countDocuments(filter),
     Reservation.aggregate([{ $group: { _id: "$status", n: { $sum: 1 } } }]),
   ]);

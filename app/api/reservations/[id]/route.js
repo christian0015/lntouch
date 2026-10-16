@@ -66,6 +66,7 @@ export const PUT = handle(async (req, { params }) => {
     await sendMail(r.email, clientStatus({
       ref: r.ref, styleName: style ? `${style.name} ${style.variant}` : r.hairstyleSlug,
       date: r.date, time: r.time, extras: extras.map((e) => e.label), customNote: r.customNote,
+      clientName: r.clientName, gender: r.gender,
       trackUrl: `${siteUrl()}/suivi/${r.viewToken}`,
     }, patch.status));
   }

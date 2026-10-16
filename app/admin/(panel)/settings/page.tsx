@@ -15,6 +15,10 @@ const salonFields: Field[] = [
   { name: "mapLink", label: "Lien Google Maps", type: "text", full: true },
   { name: "hours.mardi_samedi", label: "Horaires mardi – samedi", type: "text" },
   { name: "hours.dimanche_lundi", label: "Horaires dimanche – lundi", type: "text" },
+  { name: "whatsappMessages.confirmed", label: "Message WhatsApp — réservation confirmée", type: "textarea",
+    help: "Variables : {nom} {ref} {coiffure} {date} {heure} {salon} {lien}. Vide = message par défaut." },
+  { name: "whatsappMessages.cancelled", label: "Message WhatsApp — réservation annulée", type: "textarea" },
+  { name: "whatsappMessages.pending", label: "Message WhatsApp — demande reçue (en attente)", type: "textarea" },
 ];
 const founderFields: Field[] = [
   { name: "name", label: "Nom", type: "text" },

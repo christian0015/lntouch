@@ -74,7 +74,10 @@ export default function ResourceManager({ endpoint, keyField, items, fields, def
       <ul className="adm-list">
         {visible.map((it) => (
           <li key={it[keyField]} className={`adm-item ${it.active === false ? "off" : ""}`}>
-            {thumbOf?.(it) && /* eslint-disable-next-line @next/next/no-img-element */ <img className="adm-item-thumb" src={thumbOf(it)} alt="" />}
+            {thumbOf?.(it) && (/\.(mp4|webm)(\?|$)/i.test(thumbOf(it)!)
+              ? <video className="adm-item-thumb" src={thumbOf(it)} muted playsInline preload="metadata" />
+              /* eslint-disable-next-line @next/next/no-img-element */
+              : <img className="adm-item-thumb" src={thumbOf(it)} alt="" />)}
             <div className="adm-item-main">
               <strong>{titleOf(it)}</strong>
               {subtitleOf && <small className="adm-muted">{subtitleOf(it)}</small>}

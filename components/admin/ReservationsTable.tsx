@@ -3,13 +3,27 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/components/admin/api";
+import { DEFAULT_MESSAGES, fillTemplate, whatsappLink } from "@/components/admin/whatsapp";
+import { GENDER_LABELS, type Gender } from "@/lib/constants";
 
 const LABEL: Record<string, string> = { pending: "En attente", confirmed: "Confirmée", cancelled: "Annulée" };
 const BADGE: Record<string, string> = { pending: "warn", confirmed: "ok", cancelled: "bad" };
 
-export default function ReservationsTable({ items, styleNames, extraNames }: {
+type Messages = { pending?: string; confirmed?: string; cancelled?: string };
+
+export default function ReservationsTable({ items, styleNames, extraNames, salonName, messages }: {
   items: any[]; styleNames: Record<string, string>; extraNames: Record<string, string>;
+  salonName: string; messages: Messages;
 }) {
+  // Message WhatsApp pré-rempli selon le statut (modèles modifiables dans « Salon & fondatrice »)
+  const waHref = (r: any) => {
+    const tpl = (messages[r.status as keyof Messages] || "").trim() || DEFAULT_MESSAGES[r.status as keyof typeof DEFAULT_MESSAGES];
+    const text = fillTemplate(tpl, {
+      nom: r.clientName || "", ref: r.ref, coiffure: styleNames[r.hairstyleSlug] ?? r.hairstyleSlug,
+      date: r.date, heure: r.time, salon: salonName, lien: r.trackUrl || "",
+    });
+    return whatsappLink(r.phone, text);
+  };
   const router = useRouter();
   const [busy, setBusy] = useState<string | null>(null);
 
@@ -35,7 +49,8 @@ export default function ReservationsTable({ items, styleNames, extraNames }: {
         <tbody>
           {items.map((r) => (
             <tr key={r._id}>
-              <td><strong>{r.ref}</strong></td>
+              <td><strong>{r.ref}</strong>
+                {(r.clientName || r.gender) && <><br /><span className="adm-muted">{[r.clientName, r.gender ? GENDER_LABELS[r.gender as Gender] : ""].filter(Boolean).join(" · ")}</span></>}</td>
               <td>{r.date}<br /><span className="adm-muted">{r.time}</span></td>
               <td>{styleNames[r.hairstyleSlug] ?? r.hairstyleSlug}
                 {r.extras?.length > 0 && <><br /><span className="adm-muted">+ {r.extras.map((e: string) => extraNames[e] ?? e).join(", ")}</span></>}
@@ -47,6 +62,10 @@ export default function ReservationsTable({ items, styleNames, extraNames }: {
                   {r.status !== "confirmed" && <button className="adm-btn" disabled={busy === r._id} onClick={() => setStatus(r, "confirmed")}>Confirmer</button>}
                   {r.status !== "cancelled" && <button className="adm-btn adm-btn-danger" disabled={busy === r._id} onClick={() => setStatus(r, "cancelled")}>Annuler</button>}
                   {r.status === "cancelled" && <button className="adm-btn adm-btn-ghost" disabled={busy === r._id} onClick={() => setStatus(r, "pending")}>Rétablir</button>}
+                  {r.phone && (
+                    <a className="adm-btn adm-btn-wa" href={waHref(r)} target="_blank" rel="noopener noreferrer"
+                       title="Ouvre WhatsApp avec un message pré-rempli (selon le statut actuel)">💬 WhatsApp</a>
+                  )}
                   <button className="adm-btn adm-btn-ghost" disabled={busy === r._id} onClick={() => remove(r)} title="Supprimer">🗑</button>
                 </div>
               </td>

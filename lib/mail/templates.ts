@@ -1,6 +1,7 @@
 // lib/mail/templates.ts
 // Gabarits HTML (compatibles clients mail : tables + styles inline). TOUTES les valeurs dynamiques sont échappées.
 import { formatDateFR } from "@/lib/dates";
+import { GENDER_LABELS, type Gender } from "@/lib/constants";
 
 export const esc = (v: unknown) =>
   String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
@@ -25,12 +26,13 @@ const row = (k: string, v: string) =>
 export interface ReservationMailData {
   ref: string; styleName: string; date: string; time: string;
   extras: string[]; customNote?: string; email?: string; phone?: string;
+  clientName?: string; gender?: string;
   trackUrl?: string; salonName?: string; salonAddress?: string; whatsapp?: string;
 }
 
 function summary(d: ReservationMailData) {
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #2a2a2a;border-bottom:1px solid #2a2a2a;margin:8px 0">
-${row("Référence", d.ref)}${row("Coiffure", d.styleName)}${row("Date", formatDateFR(d.date))}${row("Heure", d.time)}
+${row("Référence", d.ref)}${d.clientName || d.gender ? row("Pour", [d.clientName, d.gender ? GENDER_LABELS[d.gender as Gender] ?? d.gender : ""].filter(Boolean).join(" · ")) : ""}${row("Coiffure", d.styleName)}${row("Date", formatDateFR(d.date))}${row("Heure", d.time)}
 ${d.extras.length ? row("Options", d.extras.join(", ")) : ""}${d.customNote ? row("Note", d.customNote) : ""}
 ${d.salonAddress ? row("Adresse", d.salonAddress) : ""}</table>`;
 }

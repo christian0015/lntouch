@@ -4,6 +4,7 @@
 // partielle (ex: { active:false }) réécrirait silencieusement les autres champs avec leurs défauts.
 import { z } from "zod";
 import { ROLES } from "@/lib/auth/permissions";
+import { GENDERS } from "@/lib/constants";
 
 const text = (max: number) => z.string().trim().min(1).max(max);
 const optText = (max: number) => z.string().trim().max(max).optional();
@@ -67,6 +68,11 @@ export const salonSchema = z.object({
   email: z.string().trim().toLowerCase().max(160).refine((v) => v === "" || z.string().email().safeParse(v).success, "email invalide").optional(),
   whatsapp: z.string().trim().regex(/^(\d{8,15})?$/, "chiffres uniquement, sans +").optional(),
   hours: z.object({ mardi_samedi: text(60), dimanche_lundi: text(60) }),
+  whatsappMessages: z.object({
+    pending: z.string().trim().max(600).optional(),
+    confirmed: z.string().trim().max(600).optional(),
+    cancelled: z.string().trim().max(600).optional(),
+  }).strict().optional(),
 }).strict();
 
 export const founderSchema = z.object({
@@ -89,6 +95,8 @@ export const reservationCreate = z.object({
   hairstyleSlug: slug,
   extras: z.array(z.string().max(40)).max(10).optional(),
   customNote: z.string().trim().max(500).optional(),
+  clientName: z.string().trim().max(80).optional().or(z.literal("")).transform((v) => v || undefined),
+  gender: z.enum(GENDERS).optional().or(z.literal("")).transform((v) => v || undefined),
   date: dateISO, time: timeHHMM,
   email: z.string().trim().toLowerCase().max(160).email().optional().or(z.literal("")).transform((v) => v || undefined),
   phone: phone.optional().or(z.literal("")).transform((v) => v || undefined),
@@ -115,3 +123,15 @@ export const userUpdate = z.object({
   name: text(80).optional(), role: z.enum(ROLES).optional(),
   active: z.boolean().optional(), newPassword: passwordSchema.optional(),
 }).strict();
+
+// ── Publications réseaux sociaux (section "Suivez-nous") ──────────────────────
+export const socialPostSchema = z.object({
+  platform: z.enum(["instagram", "tiktok", "facebook", "youtube"]),
+  caption: text(120),
+  url: z.string().trim().max(500).regex(/^https:\/\//, "URL https requise"),
+  thumbnail: z.string().trim().max(600).refine((v) => v === "" || /^https:\/\//.test(v), "URL https requise").optional(),
+  thumbnailType: z.enum(["image", "gif", "video"]).optional(),
+  thumbnailPublicId: z.string().trim().max(250).optional(),
+  order, active: z.boolean().optional(),
+}).strict();
+export const socialPostUpdate = socialPostSchema.partial().strict();

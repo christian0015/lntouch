@@ -89,6 +89,7 @@ export const POST = handle(async (req) => {
           hairstyleSlug: input.hairstyleSlug,
           extras: extras.map((e) => e.id),
           customNote: input.customNote || undefined,
+          clientName: input.clientName, gender: input.gender,
           date: input.date, time: input.time,
           email: input.email, phone: input.phone,
         });
@@ -112,6 +113,7 @@ export const POST = handle(async (req) => {
     date: input.date, time: input.time,
     extras: extras.map((e) => e.label),
     customNote: input.customNote, email: input.email, phone: input.phone,
+    clientName: input.clientName, gender: input.gender,
     trackUrl: `${siteUrl()}/suivi/${reservation.viewToken}`,
     salonAddress: salon ? [salon.quartier, salon.commune].filter(Boolean).join(", ") : undefined,
   };

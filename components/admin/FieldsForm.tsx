@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { api } from "@/components/admin/api";
 
-export type FieldType = "text" | "textarea" | "number" | "select" | "checkbox" | "tags" | "images" | "image" | "color" | "multi" | "social";
+export type FieldType = "text" | "textarea" | "number" | "select" | "checkbox" | "tags" | "images" | "image" | "media" | "color" | "multi" | "social";
 export interface Field {
   name: string;               // chemin pointé : "seo.title"
   label: string;
@@ -11,8 +11,9 @@ export interface Field {
   options?: { value: string; label: string }[];
   help?: string;
   placeholder?: string;
-  idsName?: string;           // images : champ qui stocke les publicIds Cloudinary
-  scope?: "hairstyles" | "testimonials" | "founder";
+  idsName?: string;           // champ qui stocke le(s) publicId Cloudinary (tableau pour images, chaîne pour image/media)
+  typeName?: string;          // media : champ qui stocke le type (image | gif | video)
+  scope?: "hairstyles" | "testimonials" | "founder" | "social";
   immutable?: boolean;        // non modifiable après création (slug, id)
   disabled?: boolean;         // champ verrouillé (posé par le gestionnaire en édition)
   full?: boolean;
@@ -36,7 +37,8 @@ export function initialValues(fields: Field[], item: any, defaults: any) {
   for (const f of fields) {
     const raw = item ? getPath(item, f.name) : getPath(defaults, f.name);
     v = setPath(v, f.name, raw ?? (f.type === "checkbox" ? true : f.type === "number" ? 0 : f.type === "tags" || f.type === "images" || f.type === "multi" || f.type === "social" ? [] : ""));
-    if (f.idsName) v = setPath(v, f.idsName, (item ? getPath(item, f.idsName) : []) ?? []);
+    if (f.idsName) v = setPath(v, f.idsName, (item ? getPath(item, f.idsName) : undefined) ?? (f.type === "images" ? [] : ""));
+    if (f.typeName) v = setPath(v, f.typeName, (item ? getPath(item, f.typeName) : undefined) ?? "image");
   }
   return v;
 }
@@ -49,12 +51,37 @@ export function buildPayload(fields: Field[], values: any, editing: boolean) {
     let val = getPath(values, f.name);
     if (f.type === "number") val = Number(val) || 0;
     p = setPath(p, f.name, val);
-    if (f.idsName) p = setPath(p, f.idsName, getPath(values, f.idsName) ?? []);
+    if (f.idsName) p = setPath(p, f.idsName, getPath(values, f.idsName) ?? (f.type === "images" ? [] : ""));
+    if (f.typeName) p = setPath(p, f.typeName, getPath(values, f.typeName) ?? "image");
   }
   return p;
 }
 
 const SOCIALS = ["instagram", "facebook", "tiktok", "pinterest"];
+const MB = 1024 * 1024;
+
+/** Envoi direct navigateur → Cloudinary avec signature serveur (contourne la limite ~4,5 Mo de Vercel). */
+async function uploadToCloudinary(file: File, scope: string, slug?: string) {
+  const kind = file.type.startsWith("video/") ? "video" : "image";
+  const max = kind === "video" ? 40 * MB : file.type === "image/gif" ? 15 * MB : 8 * MB;
+  if (file.size > max) throw new Error(`« ${file.name} » est trop lourd (max ${Math.round(max / MB)} Mo).`);
+  const sig = await api<any>("/api/upload/sign", "POST", { scope, slug: slug || undefined, kind });
+  const fd = new FormData();
+  fd.append("file", file);
+  fd.append("api_key", sig.apiKey);
+  fd.append("timestamp", String(sig.timestamp));
+  fd.append("signature", sig.signature);
+  fd.append("folder", sig.folder);
+  fd.append("public_id", sig.publicId);
+  fd.append("allowed_formats", sig.allowedFormats);
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${sig.cloudName}/${kind}/upload`, { method: "POST", body: fd });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data?.error?.message || "Échec de l'envoi vers Cloudinary");
+  const mediaType = kind === "video" ? "video" : data.format === "gif" ? "gif" : "image";
+  return { url: data.secure_url as string, publicId: data.public_id as string, mediaType };
+}
+
+const isVideoUrl = (u: string) => /\.(mp4|webm)(\?|$)/i.test(u);
 
 export default function FieldsForm({ fields, values, onChange, slugForUpload }: {
   fields: Field[]; values: any; onChange: (v: any) => void; slugForUpload?: string;
@@ -70,14 +97,14 @@ export default function FieldsForm({ fields, values, onChange, slugForUpload }: 
     try {
       let next = values;
       for (const file of Array.from(files)) {
-        const fd = new FormData();
-        fd.append("file", file); fd.append("scope", f.scope || "hairstyles");
-        if (f.scope === "hairstyles" && slugForUpload) fd.append("slug", slugForUpload);
-        const r = await api<{ url: string; publicId: string }>("/api/upload", "POST", fd);
-        if (f.type === "image") next = setPath(next, f.name, r.url);
-        else {
+        const r = await uploadToCloudinary(file, f.scope || "hairstyles", f.scope === "hairstyles" ? slugForUpload : undefined);
+        if (f.type === "images") {
           next = setPath(next, f.name, [...(getPath(next, f.name) || []), r.url]);
           if (f.idsName) next = setPath(next, f.idsName, [...(getPath(next, f.idsName) || []), r.publicId]);
+        } else {
+          next = setPath(next, f.name, r.url);                       // image | media (un seul fichier)
+          if (f.idsName) next = setPath(next, f.idsName, r.publicId);
+          if (f.typeName) next = setPath(next, f.typeName, r.mediaType);
         }
       }
       onChange(next);
@@ -140,12 +167,19 @@ export default function FieldsForm({ fields, values, onChange, slugForUpload }: 
                 {busy === f.name && <span className="adm-muted"> Envoi…</span>}
               </div>
             )}
-            {f.type === "image" && (
+            {(f.type === "image" || f.type === "media") && (
               <div className="adm-row">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                {val ? <img src={val} alt="" style={{ width: 56, height: 56, objectFit: "cover", borderRadius: "50%" }} /> : null}
-                <input type="file" accept="image/jpeg,image/png,image/webp" disabled={busy === f.name} onChange={(e) => { upload(f, e.target.files); e.target.value = ""; }} />
-                {val && <button type="button" className="adm-btn adm-btn-ghost" onClick={() => set(f.name, "")}>Retirer</button>}
+                {val ? (isVideoUrl(val)
+                  ? <video src={val} muted playsInline preload="metadata" style={{ width: 72, height: 72, objectFit: "cover", borderRadius: 8 }} />
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  : <img src={val} alt="" style={{ width: 72, height: 72, objectFit: "cover", borderRadius: f.type === "image" ? "50%" : 8 }} />) : null}
+                <input type="file" disabled={busy === f.name}
+                  accept={f.type === "media" ? "image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm" : "image/jpeg,image/png,image/webp"}
+                  onChange={(e) => { upload(f, e.target.files); e.target.value = ""; }} />
+                {busy === f.name && <span className="adm-muted">Envoi…</span>}
+                {val && <button type="button" className="adm-btn adm-btn-ghost" onClick={() => {
+                  set(f.name, ""); if (f.idsName) set(f.idsName, ""); if (f.typeName) set(f.typeName, "image");
+                }}>Retirer</button>}
               </div>
             )}
             {f.type === "social" && (

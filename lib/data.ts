@@ -15,10 +15,11 @@ import Testimonial from "@/models/Testimonial";
 import Faq from "@/models/Faq";
 import Salon from "@/models/Salon";
 import Founder from "@/models/Founder";
+import SocialPost from "@/models/SocialPost";
 import { cached, TAGS } from "@/lib/cache";
 import { plain } from "@/lib/api";
 import { nowHHMM, todayISO } from "@/lib/dates";
-import type { Coiffure, ExtraOption, FAQItem, FounderInfo, SalonInfo, SocialLink, Testimonial as TestimonialT } from "@/lib/types";
+import type { SocialPost as SocialPostT, Coiffure, ExtraOption, FAQItem, FounderInfo, SalonInfo, SocialLink, Testimonial as TestimonialT } from "@/lib/types";
 
 export type * from "@/lib/types";
 export { DEVELOPER } from "@/lib/constants";
@@ -95,6 +96,15 @@ export const getFounder = cached(async (): Promise<(FounderInfo & { socialLinks:
   const doc = await Founder.findOne().select("-createdAt -updatedAt").lean();
   return doc ? plain(doc) : null;
 }, ["founder"], [TAGS.founder], HOUR);
+
+export const getSocialPosts = cached(async (): Promise<SocialPostT[]> => {
+  await connectToDatabase();
+  const docs: any[] = await SocialPost.find({ active: true }).sort({ order: 1, createdAt: 1 }).lean();
+  return docs.map((d) => ({
+    id: String(d._id), platform: d.platform, caption: d.caption, url: d.url,
+    thumbnail: d.thumbnail ?? "", thumbnailType: d.thumbnailType ?? "image",
+  }));
+}, ["social-posts"], [TAGS.social], HOUR);
 
 /** Créneaux libres (dates passées exclues, heures passées du jour exclues). Cache court : 30 s. */
 const getAvailabilitiesRaw = cached(async (from: string, to: string): Promise<Record<string, string[]>> => {

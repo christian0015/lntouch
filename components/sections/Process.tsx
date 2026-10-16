@@ -401,18 +401,35 @@ function StepContact({ data, onChange, onNext, onBack }: {
 }) {
   const [email, setEmail] = useState(data.email || "");
   const [phone, setPhone] = useState(data.phone || "");
+  const [clientName, setClientName] = useState(data.clientName || "");
+  const [gender, setGender] = useState(data.gender || "");
   const valid = email.trim() !== "" || phone.trim() !== "";
   return (
     <div className="step-panel">
       <StepHeader step={4} title="Entrons en contact." sub="Un email ou un WhatsApp — on vous confirme sous 12h." />
       <div style={{ display: "flex", flexDirection: "column", gap: "1rem", maxWidth: "420px" }}>
+        <InputField label="Nom de la personne (optionnel)" type="text" placeholder="Prénom ou nom" value={clientName} onChange={setClientName} />
+        <div>
+          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "8px", letterSpacing: "0.26em", color: "rgba(255,255,255,0.22)", textTransform: "uppercase", marginBottom: "8px" }}>
+            Pour qui ? (optionnel)
+          </div>
+          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+            {[["femme", "Femme"], ["homme", "Homme"], ["enfant", "Enfant"]].map(([v, l]) => (
+              <button key={v} type="button" onClick={() => setGender(gender === v ? "" : v)}
+                style={{ padding: "9px 18px", borderRadius: "2px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase",
+                  background: gender === v ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.03)",
+                  border: `1px solid ${gender === v ? "rgba(255,255,255,0.4)" : "rgba(255,255,255,0.08)"}`,
+                  color: gender === v ? "#fff" : "rgba(255,255,255,0.4)" }}>{l}</button>
+            ))}
+          </div>
+        </div>
         <InputField label="Email" type="email" placeholder="votre@email.com" value={email} onChange={setEmail} />
         <InputField label="WhatsApp / Téléphone" type="tel" placeholder="+33 6 00 00 00 00" value={phone} onChange={setPhone} />
         <p style={{ fontFamily: "'Space Mono', monospace", fontSize: "8px", letterSpacing: "0.18em", color: "rgba(255,255,255,0.2)", marginTop: "0.25rem" }}>
           Au moins un champ requis · Vos données ne sont jamais partagées.
         </p>
       </div>
-      <StepActions onNext={() => { onChange({ email, phone }); onNext(); }} onBack={onBack} nextDisabled={!valid} nextLabel="Continuer →" />
+      <StepActions onNext={() => { onChange({ email, phone, clientName: clientName.trim(), gender }); onNext(); }} onBack={onBack} nextDisabled={!valid} nextLabel="Continuer →" />
     </div>
   );
 }
@@ -474,6 +491,7 @@ function StepConfirm({ data, onBack, onSubmit, styles, extraOptions }: {
           { icon: "◇", label: "Style",   value: styleObj ? `${styleObj.name} · ${styleObj.price}` : "—" },
           { icon: "○", label: "Extras",  value: extraList.length ? extraList.join(", ") : "Aucun" },
           { icon: "△", label: "Créneau", value: data.date && data.time ? `${data.date} à ${data.time}` : "—" },
+          ...(data.clientName || data.gender ? [{ icon: "◉", label: "Pour", value: [data.clientName, ({ femme: "Femme", homme: "Homme", enfant: "Enfant" } as Record<string, string>)[data.gender]].filter(Boolean).join(" · ") }] : []),
           { icon: "□", label: "Contact", value: data.email || data.phone || "—" },
         ].map((row) => (
           <div key={row.label} style={{ display: "flex", gap: "14px", alignItems: "flex-start" }}>
@@ -557,7 +575,7 @@ export default function Process({
 
   const [step, setStep]       = useState(1);
   const [formData, setFormData] = useState({
-    email: "", phone: "",
+    email: "", phone: "", clientName: "", gender: "",
     style: preselectedStyleId || null,
     extras: [] as string[], customNote: "",
     date: null as string | null, time: null as string | null,
@@ -606,6 +624,8 @@ export default function Process({
         time:          data.time,
         email:         data.email,
         phone:         data.phone,
+        clientName:    data.clientName || undefined,
+        gender:        data.gender || undefined,
       }),
     });
     if (!res.ok) {

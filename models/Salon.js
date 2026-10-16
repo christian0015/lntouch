@@ -13,6 +13,12 @@ const HoursSchema = new mongoose.Schema(
   { _id: false }
 );
 
+// Messages WhatsApp pré-remplis (placeholders : {nom} {ref} {coiffure} {date} {heure} {salon} {lien})
+const WhatsappMessagesSchema = new mongoose.Schema(
+  { pending: { type: String }, confirmed: { type: String }, cancelled: { type: String } },
+  { _id: false }
+);
+
 const SalonSchema = new mongoose.Schema(
   {
     name:      { type: String, required: true },
@@ -24,6 +30,7 @@ const SalonSchema = new mongoose.Schema(
     email:     { type: String },
     whatsapp:  { type: String },   // numéro sans "+" ex: "243856270030"
     hours:     { type: HoursSchema, default: () => ({}) },
+    whatsappMessages: { type: WhatsappMessagesSchema, default: () => ({}) },
   },
   { timestamps: true }
 );

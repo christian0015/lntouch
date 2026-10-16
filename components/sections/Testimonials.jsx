@@ -54,7 +54,16 @@ const GLOBAL_STYLES = `
   }
 `;
 
-export default function Testimonials({ testimonials = [] }) {
+// Dégradés de repli quand une publication n'a pas de couverture
+const FALLBACK_GRADIENTS = [
+  "linear-gradient(135deg, #1f142b 0%, #0a0a0a 100%)",
+  "linear-gradient(135deg, #142b27 0%, #0a0a0a 100%)",
+  "linear-gradient(135deg, #2b1d14 0%, #0a0a0a 100%)",
+  "linear-gradient(135deg, #2b1424 0%, #0a0a0a 100%)",
+];
+const PLATFORM_LABELS = { instagram: "Instagram", tiktok: "TikTok", facebook: "Facebook", youtube: "YouTube" };
+
+export default function Testimonials({ testimonials = [], socialPosts = [] }) {
   const sectionRef = useRef(null);
   const headerRef = useRef(null);
   const cardsRef = useRef([]);
@@ -105,20 +114,23 @@ export default function Testimonials({ testimonials = [] }) {
         );
       });
 
-      gsap.fromTo(
-        instaRef.current,
-        { opacity: 0, scale: 0.95 },
-        {
-          opacity: 1,
-          scale: 1,
-          duration: 1,
-          scrollTrigger: {
-            trigger: instaRef.current,
-            start: "top 85%",
-            toggleActions: "play none none reverse"
+      // La section "Suivez-nous" n'existe que s'il y a des publications
+      if (instaRef.current) {
+        gsap.fromTo(
+          instaRef.current,
+          { opacity: 0, scale: 0.95 },
+          {
+            opacity: 1,
+            scale: 1,
+            duration: 1,
+            scrollTrigger: {
+              trigger: instaRef.current,
+              start: "top 85%",
+              toggleActions: "play none none reverse"
+            }
           }
-        }
-      );
+        );
+      }
     }, sectionRef);
 
     return () => ctx.revert();
@@ -138,42 +150,6 @@ export default function Testimonials({ testimonials = [] }) {
       </svg>
     ));
   };
-
-  // Mettez à jour 'thumbnail' avec vos propres images de couverture si vous en avez (ex: "/images/reel1.jpg")
- const socialPosts = [
-    {
-      id: 1,
-      type: "instagram",
-      caption: "Révélation & Élégance ✨",
-      profileUrl: "https://www.instagram.com/reel/DXkdNKmiPrR/",
-      thumbnail: "/images/Testimonials/post-1.png",
-      bgGradient: "linear-gradient(135deg, #1f142b 0%, #0a0a0a 100%)"
-    },
-    {
-      id: 2,
-      type: "tiktok",
-      caption: "Instant Bien-être 🌿",
-      profileUrl: "https://www.tiktok.com/@_leoniiie.t/video/7629065841786490132",
-      thumbnail: "/images/Testimonials/post-2.png",
-      bgGradient: "linear-gradient(135deg, #142b27 0%, #0a0a0a 100%)"
-    },
-    {
-      id: 3,
-      type: "instagram",
-      caption: "Rayonnante & Épanouie 💬",
-      profileUrl: "https://www.instagram.com/reel/DXPf1-YCL_c/",
-      thumbnail: "/images/Testimonials/post-3.png",
-      bgGradient: "linear-gradient(135deg, #2b1d14 0%, #0a0a0a 100%)"
-    },
-    {
-      id: 4,
-      type: "instagram",
-      caption: "Le Sourire LN Touch 🤍",
-      profileUrl: "https://www.instagram.com/lntouch12/reel/DdogHXCoiC5/",
-      thumbnail: "/images/Testimonials/post-4.png",
-      bgGradient: "linear-gradient(135deg, #2b1424 0%, #0a0a0a 100%)"
-    }
-  ];
 
   return (
     <section
@@ -248,7 +224,8 @@ export default function Testimonials({ testimonials = [] }) {
         ))}
       </div>
 
-      {/* Social Feed Section */}
+      {/* Social Feed Section (masquée sans publication) */}
+      {socialPosts.length > 0 && (
       <div ref={instaRef} style={{ position: "relative", zIndex: 5, maxWidth: "1200px", margin: "5rem auto 0", padding: "0 1.5rem" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "16px", marginBottom: "2rem", flexWrap: "wrap" }}>
           <div style={{ height: "1px", width: "48px", background: "rgba(212,175,55,0.3)" }} />
@@ -264,66 +241,88 @@ export default function Testimonials({ testimonials = [] }) {
 
         {/* Grille Social Media */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "1.5rem", marginBottom: "3rem" }}>
-          {socialPosts.map((post) => (
-            <div
-              key={post.id}
-              className="social-card-hover"
-              style={{
-                position: "relative",
-                width: "100%",
-                aspectRatio: "4/5",
-                background: post.thumbnail ? `url(${post.thumbnail}) center/cover no-repeat` : post.bgGradient,
-                border: "1px solid rgba(212,175,55,0.2)",
-                borderRadius: "16px",
-                overflow: "hidden",
-                cursor: "pointer",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between"
-              }}
-              onClick={() => window.open(post.profileUrl, "_blank")}
-            >
-              {/* Overlay Sombre pour lisibilité */}
-              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.85) 100%)", zIndex: 1 }} />
+          {socialPosts.map((post, idx) => {
+            const isVideo = post.thumbnailType === "video" && !!post.thumbnail;
+            const hasImage = !!post.thumbnail && !isVideo; // image ou GIF animé
+            return (
+              <div
+                key={post.id}
+                className="social-card-hover"
+                style={{
+                  position: "relative",
+                  width: "100%",
+                  aspectRatio: "4/5",
+                  background: hasImage ? `url(${post.thumbnail}) center/cover no-repeat` : FALLBACK_GRADIENTS[idx % FALLBACK_GRADIENTS.length],
+                  border: "1px solid rgba(212,175,55,0.2)",
+                  borderRadius: "16px",
+                  overflow: "hidden",
+                  cursor: "pointer",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between"
+                }}
+                onClick={() => window.open(post.url, "_blank", "noopener,noreferrer")}
+                onMouseEnter={(e) => { const v = e.currentTarget.querySelector("video"); if (v) v.play().catch(() => {}); }}
+                onMouseLeave={(e) => { const v = e.currentTarget.querySelector("video"); if (v) { v.pause(); v.currentTime = 0; } }}
+              >
+                {/* Couverture vidéo : 1re image affichée, lecture au survol */}
+                {isVideo && (
+                  <video
+                    src={post.thumbnail}
+                    muted
+                    loop
+                    playsInline
+                    preload="metadata"
+                    style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+                  />
+                )}
 
-              {/* Badge supérieur (Instagram / TikTok) */}
-              <div style={{ position: "relative", zIndex: 2, padding: "16px", display: "flex", justifyContent: "flex-end" }}>
-                <div style={{ width: "36px", height: "36px", borderRadius: "50%", background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)", border: "1px solid rgba(212,175,55,0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  {post.type === "instagram" ? (
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                {/* Overlay Sombre pour lisibilité */}
+                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.85) 100%)", zIndex: 1 }} />
+
+                {/* Badge supérieur (réseau) */}
+                <div style={{ position: "relative", zIndex: 2, padding: "16px", display: "flex", justifyContent: "flex-end" }}>
+                  <div style={{ width: "36px", height: "36px", borderRadius: "50%", background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)", border: "1px solid rgba(212,175,55,0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    {post.platform === "instagram" ? (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                      </svg>
+                    ) : post.platform === "tiktok" ? (
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="#D4AF37">
+                        <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V4h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 3 15.68 6.34 6.34 0 0 0 9.34 22a6.34 6.34 0 0 0 6.33-6.32V9.58a8.16 8.16 0 0 0 4.92 1.67V7.8a4.85 4.85 0 0 1-1-.11z" />
+                      </svg>
+                    ) : (
+                      <span style={{ color: "#D4AF37", fontSize: "12px", fontFamily: "'Space Mono', monospace" }}>
+                        {(PLATFORM_LABELS[post.platform] || "•").charAt(0)}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Bouton de lecture au survol (Play Icon) */}
+                <div className="play-overlay" style={{ position: "absolute", top: "40%", left: "50%", transform: "translate(-50%, -50%) scale(0.8)", opacity: 0, transition: "all 0.3s ease", zIndex: 2 }}>
+                  <div style={{ width: "50px", height: "50px", borderRadius: "50%", background: "rgba(212,175,55,0.9)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 0 20px rgba(212,175,55,0.5)" }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#0a0a0a" style={{ marginLeft: "3px" }}>
+                      <polygon points="5 3 19 12 5 21 5 3"></polygon>
                     </svg>
-                  ) : (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#D4AF37">
-                      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V4h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 3 15.68 6.34 6.34 0 0 0 9.34 22a6.34 6.34 0 0 0 6.33-6.32V9.58a8.16 8.16 0 0 0 4.92 1.67V7.8a4.85 4.85 0 0 1-1-.11z" />
-                    </svg>
-                  )}
+                  </div>
                 </div>
-              </div>
 
-              {/* Bouton de lecture au survol (Play Icon) */}
-              <div className="play-overlay" style={{ position: "absolute", top: "40%", left: "50%", transform: "translate(-50%, -50%) scale(0.8)", opacity: 0, transition: "all 0.3s ease", zIndex: 2 }}>
-                <div style={{ width: "50px", height: "50px", borderRadius: "50%", background: "rgba(212,175,55,0.9)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 0 20px rgba(212,175,55,0.5)" }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="#0a0a0a" style={{ marginLeft: "3px" }}>
-                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                  </svg>
+                {/* Contenu bas de carte */}
+                <div style={{ position: "relative", zIndex: 2, padding: "20px" }}>
+                  <p style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "1.05rem", fontWeight: 500, color: "#ffffff", margin: "0 0 12px 0", lineHeight: 1.4 }}>
+                    "{post.caption}"
+                  </p>
+                  <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontFamily: "'Space Mono', monospace", fontSize: "9px", letterSpacing: "0.15em", color: "#D4AF37", textTransform: "uppercase" }}>
+                    <span>Voir sur {PLATFORM_LABELS[post.platform] || "le réseau"}</span>
+                    <span>→</span>
+                  </div>
                 </div>
               </div>
-
-              {/* Contenu bas de carte */}
-              <div style={{ position: "relative", zIndex: 2, padding: "20px" }}>
-                <p style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "1.05rem", fontWeight: 500, color: "#ffffff", margin: "0 0 12px 0", lineHeight: 1.4 }}>
-                  "{post.caption}"
-                </p>
-                <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontFamily: "'Space Mono', monospace", fontSize: "9px", letterSpacing: "0.15em", color: "#D4AF37", textTransform: "uppercase" }}>
-                  <span>Voir sur {post.type === "instagram" ? "Instagram" : "TikTok"}</span>
-                  <span>→</span>
-                </div>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <div style={{ textAlign: "center" }}>
@@ -350,6 +349,7 @@ export default function Testimonials({ testimonials = [] }) {
           </a>
         </div>
       </div>
+      )}
     </section>
   );
 }

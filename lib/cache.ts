@@ -10,6 +10,7 @@ export const TAGS = {
   salon: "salon",
   founder: "founder",
   availabilities: "availabilities",
+  social: "social",
 } as const;
 export type Tag = (typeof TAGS)[keyof typeof TAGS];
 

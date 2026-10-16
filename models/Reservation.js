@@ -12,6 +12,9 @@ const ReservationSchema = new mongoose.Schema(
     hairstyleSlug: { type: String, required: true },
     extras:        [{ type: String }],
     customNote:    { type: String },
+    // Optionnels : la personne qui profitera de la séance
+    clientName:    { type: String },
+    gender:        { type: String, enum: ["femme", "homme", "enfant"] },
     date:          { type: String, required: true }, // "2026-05-01"
     time:          { type: String, required: true }, // "10:00"
     email:         { type: String },

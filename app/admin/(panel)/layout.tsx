@@ -14,6 +14,7 @@ const NAV: { href: string; label: string; perm?: Permission }[] = [
   { href: "/admin/hairstyles", label: "Coiffures", perm: "content:write" },
   { href: "/admin/extras", label: "Options (extras)", perm: "content:write" },
   { href: "/admin/testimonials", label: "Témoignages", perm: "content:write" },
+  { href: "/admin/social", label: "Publications (réseaux)", perm: "content:write" },
   { href: "/admin/faq", label: "FAQ", perm: "content:write" },
   { href: "/admin/settings", label: "Salon & fondatrice", perm: "settings:write" },
   { href: "/admin/team", label: "Équipe & rôles", perm: "users:manage" },

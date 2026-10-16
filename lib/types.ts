@@ -58,6 +58,7 @@ export interface SalonInfo {
   email: string;
   whatsapp: string;
   hours: { mardi_samedi: string; dimanche_lundi: string };
+  whatsappMessages?: { pending?: string; confirmed?: string; cancelled?: string };
 }
 
 export interface FounderInfo {
@@ -81,3 +82,15 @@ export interface DeveloperInfo {
 }
 
 export type ReservationStatus = "pending" | "confirmed" | "cancelled";
+
+export type SocialPlatform = "instagram" | "tiktok" | "facebook" | "youtube";
+export type MediaType = "image" | "gif" | "video";
+
+export interface SocialPost {
+  id: string;
+  platform: SocialPlatform;
+  caption: string;
+  url: string;
+  thumbnail: string;
+  thumbnailType: MediaType;
+}

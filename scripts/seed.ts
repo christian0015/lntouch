@@ -10,6 +10,7 @@ import Testimonial from "../models/Testimonial";
 import Salon from "../models/Salon";
 import Founder from "../models/Founder";
 import Availability from "../models/Availability";
+import SocialPost from "../models/SocialPost";
 import { COIFFURES, EXTRAS, FAQ_ITEMS, TESTIMONIALS, SALON, FOUNDER, SOCIAL_LINKS } from "./seed-data";
 import { addDaysISO, todayISO } from "../lib/dates";
 
@@ -33,6 +34,17 @@ async function main() {
     const { id: _id, ...rest } = t as any;
     return { updateOne: { filter: { name: t.name, text: t.text }, update: { $setOnInsert: { ...rest, order: i + 1, active: true } }, upsert: true } };
   }));
+
+  // Publications "Suivez-nous" d'origine (couvertures à ajouter ensuite depuis l'admin)
+  const POSTS = [
+    { platform: "instagram", caption: "Transformation & Accompagnement ✨", url: "https://www.instagram.com/reel/DXkdNKmiPrR/" },
+    { platform: "tiktok", caption: "Routine & Bien-être 🌿", url: "https://www.tiktok.com/@_leoniiie.t/video/7629065841786490132" },
+    { platform: "instagram", caption: "Clientes en joie 💬", url: "https://www.instagram.com/reel/DXPf1-YCL_c/" },
+    { platform: "instagram", caption: "Avis & Résultats 🤍", url: "https://www.instagram.com/lntouch12/reel/DdogHXCoiC5/" },
+  ];
+  await SocialPost.bulkWrite(POSTS.map((p, i) => ({
+    updateOne: { filter: { url: p.url }, update: { $setOnInsert: { ...p, order: i + 1, active: true, thumbnailType: "image" } }, upsert: true },
+  })));
 
   if (!(await Salon.countDocuments())) await Salon.create(SALON);
   if (!(await Founder.countDocuments())) await Founder.create({ ...FOUNDER, socialLinks: SOCIAL_LINKS });
