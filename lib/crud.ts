@@ -130,7 +130,7 @@ export function singletonRoutes(opts: {
 }) {
   const GET = handle(async () => {
     await connectToDatabase();
-    const doc = await opts.model.findOne().select("-createdAt -updatedAt").lean();
+    const doc = await opts.model.findOne().select("-createdAt -updatedAt -avatarPublicId").lean();
     if (!doc) throw new ApiError(404, "Introuvable");
     return NextResponse.json(plain(doc), { headers: CDN_CACHE });
   });

@@ -24,7 +24,7 @@ const FounderSchema = new mongoose.Schema(
     bio:          { type: String, required: true },
     experience:   { type: String },           // "18 ans d'expertise"
     avatar:         { type: String },
-    avatarPublicId: { type: String },           // URL Cloudinary optionnelle
+    avatarPublicId: { type: String },           // pour suppression Cloudinary
     socialLinks:  [SocialLinkSchema],
   },
   { timestamps: true }

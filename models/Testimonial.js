@@ -8,8 +8,8 @@ const TestimonialSchema = new mongoose.Schema(
     rating:  { type: Number, default: 5, min: 1, max: 5 },
     text:    { type: String, required: true },
     date:    { type: String },              // "Il y a 2 semaines" — affiché tel quel
-    avatar:         { type: String },
-    avatarPublicId: { type: String, select: false },              // URL ou chemin /images/...
+    avatar:         { type: String },              // URL Cloudinary ou chemin /images/...
+    avatarPublicId: { type: String },
     service: { type: String },              // Nom de la coiffure
     order:   { type: Number, default: 0 },
     active:  { type: Boolean, default: true },

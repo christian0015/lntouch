@@ -2,6 +2,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Gallery from "@/components/sections/Gallery";
+import SiteNav from "@/components/site/SiteNav";
 import { getCoiffuresPage } from "@/lib/data";
 
 export const revalidate = 3600;
@@ -24,6 +25,7 @@ export default async function CoiffuresPage({ searchParams }: { searchParams: Pr
 
   return (
     <>
+      <SiteNav />
       <Gallery coiffures={items} />
       {pages > 1 && (
         <nav aria-label="Pagination" style={{ background: "#0a0a0a", display: "flex", gap: 16, justifyContent: "center", alignItems: "center", padding: "32px 16px 64px" }}>

@@ -1,6 +1,6 @@
 // components/admin/AdminShell.tsx
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import LogoutButton from "@/components/admin/LogoutButton";
@@ -12,51 +12,54 @@ export default function AdminShell({ navItems, user, children }: {
 }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
-  const sideRef = useRef<HTMLElement>(null);
 
-  // Fermer le menu au changement de page
+  // Ferme le tiroir à chaque changement de page
   useEffect(() => { setOpen(false); }, [pathname]);
 
-  // Fermer en cliquant en dehors
+  // Échap pour fermer + blocage du scroll de la page quand le tiroir est ouvert
   useEffect(() => {
     if (!open) return;
-    const fn = (e: MouseEvent) => { if (sideRef.current && !sideRef.current.contains(e.target as Node)) setOpen(false); };
-    document.addEventListener("mousedown", fn);
-    return () => document.removeEventListener("mousedown", fn);
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    document.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = prev; };
   }, [open]);
 
   return (
     <div className="adm-shell">
-      <aside ref={sideRef} className={`adm-side ${open ? "adm-nav-mobile-open" : ""}`}>
-        {/* Desktop : marque toujours visible */}
-        <p className="adm-brand" style={{ margin: "0 0 12px" }}>LN Touch · Admin</p>
-
-        {/* Toggle mobile */}
-        <button className="adm-mobile-toggle" onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-label="Menu">
-          <span>{open ? "Fermer" : "Menu"}</span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            {open
-              ? <><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></>
-              : <><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></>}
+      {/* Barre du haut — visible uniquement sur mobile */}
+      <header className="adm-topbar">
+        <button type="button" className="adm-burger" aria-label="Ouvrir le menu" aria-expanded={open} onClick={() => setOpen(true)}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" />
           </svg>
         </button>
+        <span className="adm-topbar-title">LN Touch · Admin</span>
+      </header>
 
-        {/* Nav links */}
+      <div className={`adm-overlay ${open ? "open" : ""}`} onClick={() => setOpen(false)} aria-hidden />
+
+      {/* Barre latérale (bureau) / tiroir (mobile) */}
+      <aside className={`adm-side ${open ? "open" : ""}`} aria-label="Navigation de l'administration">
+        <div className="adm-drawer-head">
+          <span className="adm-topbar-title">LN Touch · Admin</span>
+          <button type="button" className="adm-drawer-close" aria-label="Fermer le menu" onClick={() => setOpen(false)}>✕</button>
+        </div>
+        <p className="adm-brand">LN Touch · Admin</p>
+
         <nav className="adm-nav">
           {navItems.map((n) => (
-            <Link key={n.href} href={n.href} className={pathname === n.href ? "active" : ""}>
+            <Link key={n.href} href={n.href} className={pathname === n.href ? "active" : ""} onClick={() => setOpen(false)}>
               {n.label}
             </Link>
           ))}
           <a href="/" target="_blank" rel="noopener">Voir le site ↗</a>
         </nav>
 
-        {/* Infos utilisateur */}
         <div className="adm-me">
-          <div style={{ flex: 1 }}>
-            <div>{user.name}</div>
-            <div className="adm-muted" style={{ fontSize: 12 }}>{user.role}</div>
-          </div>
+          <div>{user.name}</div>
+          <div className="adm-muted" style={{ fontSize: 12, marginBottom: 10 }}>{user.role}</div>
           <LogoutButton />
         </div>
       </aside>

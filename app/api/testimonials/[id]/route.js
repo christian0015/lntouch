@@ -6,7 +6,7 @@ import { testimonialSchema, testimonialUpdate } from "@/lib/validation";
 const h = itemRoutes({
   model: Testimonial, tag: "testimonials", permission: "content:write",
   createSchema: testimonialSchema, updateSchema: testimonialUpdate, keyField: "_id",
-  publicSelect: "-createdAt -updatedAt",
+  publicSelect: "-createdAt -updatedAt -avatarPublicId",
   imagePublicIdField: "avatarPublicId",
 });
 const wrap = (fn) => async (req, { params }) => fn(req, { params: params.then(({ id }) => ({ key: id })) });

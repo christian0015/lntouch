@@ -93,7 +93,7 @@ export const getSalon = cached(async (): Promise<SalonInfo | null> => {
 
 export const getFounder = cached(async (): Promise<(FounderInfo & { socialLinks: SocialLink[] }) | null> => {
   await connectToDatabase();
-  const doc = await Founder.findOne().select("-createdAt -updatedAt").lean();
+  const doc = await Founder.findOne().select("-createdAt -updatedAt -avatarPublicId").lean();
   return doc ? plain(doc) : null;
 }, ["founder"], [TAGS.founder], HOUR);
 

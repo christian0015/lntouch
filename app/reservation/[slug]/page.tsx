@@ -2,6 +2,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Process from "@/components/sections/Process";
+import SiteNav from "@/components/site/SiteNav";
 import { getAllSlugs, getBookableAvailabilities, getCoiffureBySlug, getCoiffures, getExtras, getSalon } from "@/lib/data";
 
 export const revalidate = 600;
@@ -44,5 +45,10 @@ export default async function ReservationSlugPage({ params }: { params: Promise<
   const [coiffures, extras, availabilities, salon] = await Promise.all([
     getCoiffures(), getExtras(), getBookableAvailabilities(), getSalon(),
   ]);
-  return <Process slug={coiffure.slug} coiffures={coiffures} extras={extras} availabilities={availabilities} salon={salon} />;
+  return (
+    <>
+      <SiteNav />
+      <Process slug={coiffure.slug} coiffures={coiffures} extras={extras} availabilities={availabilities} salon={salon} />
+    </>
+  );
 }
