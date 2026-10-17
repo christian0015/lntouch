@@ -1,9 +1,8 @@
 // app/admin/(panel)/layout.tsx
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
 import { can, ROLE_LABELS, type Permission } from "@/lib/auth/permissions";
-import LogoutButton from "@/components/admin/LogoutButton";
+import AdminShell from "@/components/admin/AdminShell";
 
 export const dynamic = "force-dynamic"; // l'admin n'est jamais mis en cache
 
@@ -25,21 +24,10 @@ export default async function PanelLayout({ children }: { children: React.ReactN
   const user = await getCurrentUser();
   if (!user) redirect("/admin/login");
 
+  const navItems = NAV.filter((n) => !n.perm || can(user.role, n.perm));
   return (
-    <div className="adm-shell">
-      <aside className="adm-side">
-        <p className="adm-brand">LN Touch · Admin</p>
-        <nav className="adm-nav">
-          {NAV.filter((n) => !n.perm || can(user.role, n.perm)).map((n) => <Link key={n.href} href={n.href}>{n.label}</Link>)}
-          <a href="/" target="_blank" rel="noopener">Voir le site ↗</a>
-        </nav>
-        <div className="adm-me">
-          <div>{user.name}</div>
-          <div className="adm-muted">{ROLE_LABELS[user.role]}</div>
-          <div style={{ marginTop: 10 }}><LogoutButton /></div>
-        </div>
-      </aside>
-      <main className="adm-main">{children}</main>
-    </div>
+    <AdminShell navItems={navItems} user={{ name: user.name, role: ROLE_LABELS[user.role] }}>
+      {children}
+    </AdminShell>
   );
 }
